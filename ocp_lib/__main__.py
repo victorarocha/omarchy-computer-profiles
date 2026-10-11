@@ -26,9 +26,13 @@ def main():
     if args.command=='detect': print(json.dumps(hardware(),indent=2));return
     if args.command=='restore': restore(args.backup,args.execute);return
     if args.command=='list':
-        print('PROFILE\tCOMPUTER\tSTATUS\tAUTHOR')
+        rows=[('PROFILE','COMPUTER','STATUS','AUTHOR')]
         for path in sorted((ROOT/'profiles').glob('*/profile.json')):
-            m=load_manifest(path.parent);print(f"{m['id']}\t{m['hardware']['vendor']} {m['hardware']['model']}\t{m['validation']['status']}\t{m.get('author', 'Unknown')}")
+            m=load_manifest(path.parent)
+            rows.append((m['id'],f"{m['hardware']['vendor']} {m['hardware']['model']}",m['validation']['status'],m.get('author','Unknown')))
+        widths=[max(len(row[column]) for row in rows) for column in range(3)]
+        for row in rows:
+            print('  '.join(value.ljust(width) for value,width in zip(row,widths))+'  '+row[3])
         return
     folder=ROOT/'profiles'/safe_id(args.profile)
     m=validate(folder)
