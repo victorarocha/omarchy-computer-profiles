@@ -211,6 +211,11 @@ def capture_plugins(folder, entries, home, shell, warnings):
     return plugins
 
 def capture(profile_id=None, home=None, system=None, profiles=None, note=''):
+    while True:
+        try: author=input('Author name: ').strip()
+        except EOFError: raise ValueError('Author name is required; capture needs interactive input') from None
+        if author and not any(ord(c)<32 or ord(c)==127 for c in author): break
+        print('Enter a nonempty author name without control characters.')
     home=home or pathlib.Path.home();system=system or pathlib.Path('/');profiles=profiles or ROOT/'profiles'
     hw=hardware(system);profile_id=safe_id(profile_id or slug(hw['vendor']+'-'+hw['model']))
     destination=profiles/profile_id
@@ -258,7 +263,7 @@ def capture(profile_id=None, home=None, system=None, profiles=None, note=''):
         services=[name for name in sorted(SERVICES) if any((system/'etc/systemd/system').glob(f'*.wants/{name}'))]
         if any(x['path']=='etc/mbpfan.conf' for x in entries): warnings.append('Verify fan RPM limits against target applesmc hardware before applying.')
         if any(review.values()): warnings.append('Unclassified kernel options were recorded for review and are not applied.')
-        data={'schema_version':1,'id':profile_id,'created_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        data={'schema_version':1,'id':profile_id,'author':author,'created_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),
               'description':note or f'Community hardware profile for {hw["vendor"]} {hw["model"]}',
               'hardware':hw,'environment':{'omarchy':installed.get('omarchy'),'hyprland':installed.get('hyprland'),'kernel':platform.release()},
               'validation':{'status':'captured','tested_on_other_machine':False,'notes':[]},
@@ -267,7 +272,7 @@ def capture(profile_id=None, home=None, system=None, profiles=None, note=''):
               'plugin_detection':'All installed user plugins except disabledPlugins; built-ins remain supplied by Omarchy.',
               'files':sorted(entries,key=lambda x:(x['scope'],x['path'])),'warnings':warnings}
         (folder/'profile.json').write_text(json.dumps(data,indent=2)+'\n')
-        (folder/'README.md').write_text(f'# {hw["vendor"]} {hw["model"]}\n\n{data["description"]}\n\nStatus: captured; not independently tested.\n\n'+
+        (folder/'README.md').write_text(f'# {hw["vendor"]} {hw["model"]}\n\n{data["description"]}\n\nAuthor: {author}\n\nStatus: captured; not independently tested.\n\n'+
             '## Contributor verification\n\nRecord display, audio, network, Bluetooth, suspend/resume, fan and boot results here.\n\n'+
             '## Capture warnings\n\n'+'\n'.join('- '+w for w in warnings)+'\n')
         validate(folder);folder.rename(destination)
@@ -279,7 +284,9 @@ def validate(folder):
     if p.is_symlink(): raise ValueError('Profile manifest must not be a symlink')
     m=json.loads(p.read_text())
     required={'schema_version','id','created_at','description','hardware','environment','validation','boot','hardware_packages','services','software','plugins','plugin_detection','files','warnings'}
-    if not isinstance(m,dict) or set(m)!=required: raise ValueError('Invalid profile manifest fields')
+    if not isinstance(m,dict) or not required <= set(m) or set(m)-required-{'author'}: raise ValueError('Invalid profile manifest fields')
+    if 'author' in m and (not isinstance(m['author'],str) or not m['author'].strip() or any(ord(c)<32 or ord(c)==127 for c in m['author'])):
+        raise ValueError('Author must be a nonempty name without control characters')
     for key in ['hardware_packages','services','software','plugins','files','warnings']:
         if not isinstance(m[key],list): raise ValueError(f'Expected array: {key}')
     if m['validation'].get('status') not in ['captured','locally-tested','model-verified']: raise ValueError('Invalid validation status')

@@ -43,9 +43,33 @@ class CaptureTests(unittest.TestCase):
             p=self.home/'.config/omarchy/plugins'/name;p.mkdir(parents=True)
             (p/'manifest.json').write_text(json.dumps({'id':name,'version':'1.0','license':'MIT'}));(p/'Panel.qml').write_text('Item {}')
             (p/'preview.png').write_bytes(b'\x89PNG\x00image')
+        self.author_prompt=patch('builtins.input',return_value='Test Author');self.author_prompt.start()
+        self.addCleanup(self.author_prompt.stop)
         self.patcher=patch('ocp_lib.core.execute',return_value='');self.patcher.start()
     def tearDown(self): self.patcher.stop();self.tmp.cleanup()
     def capture(self): return capture('example-model',self.home,self.system,self.profiles)
+    def test_author_prompt_retries_blank_and_records_trimmed_name(self):
+        with patch('builtins.input',side_effect=['', '  ', '  Ada Lovelace  ']) as prompt:
+            folder=self.capture()
+        self.assertEqual(prompt.call_count,3)
+        self.assertEqual(validate(folder)['author'],'Ada Lovelace')
+        self.assertIn('Author: Ada Lovelace',(folder/'README.md').read_text())
+    def test_author_required_when_input_unavailable(self):
+        with patch('builtins.input',side_effect=EOFError), self.assertRaisesRegex(ValueError,'Author name is required'):
+            self.capture()
+        self.assertFalse(self.profiles.exists())
+    def test_legacy_profiles_and_list_author(self):
+        import io,sys
+        from ocp_lib.__main__ import main
+        folder=self.capture()
+        output=io.StringIO()
+        with patch('ocp_lib.__main__.ROOT',self.base), patch.object(sys,'argv',['ocp','list']), patch('sys.stdout',output): main()
+        self.assertIn('AUTHOR',output.getvalue());self.assertIn('Test Author',output.getvalue())
+        m=json.loads((folder/'profile.json').read_text());m.pop('author');(folder/'profile.json').write_text(json.dumps(m))
+        validate(folder)
+        output=io.StringIO()
+        with patch('ocp_lib.__main__.ROOT',self.base), patch.object(sys,'argv',['ocp','list']), patch('sys.stdout',output): main()
+        self.assertIn('Unknown',output.getvalue())
     def test_capture_is_private_and_contains_active_plugins_assets_and_software(self):
         folder=self.capture();m=validate(folder)
         self.assertEqual([p['id'] for p in m['plugins']],['active'])

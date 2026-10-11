@@ -26,8 +26,9 @@ def main():
     if args.command=='detect': print(json.dumps(hardware(),indent=2));return
     if args.command=='restore': restore(args.backup,args.execute);return
     if args.command=='list':
+        print('PROFILE\tCOMPUTER\tSTATUS\tAUTHOR')
         for path in sorted((ROOT/'profiles').glob('*/profile.json')):
-            m=validate(path.parent);print(f"{m['id']}\t{m['hardware']['vendor']} {m['hardware']['model']}\t{m['validation']['status']}")
+            m=validate(path.parent);print(f"{m['id']}\t{m['hardware']['vendor']} {m['hardware']['model']}\t{m['validation']['status']}\t{m.get('author', 'Unknown')}")
         return
     folder=ROOT/'profiles'/safe_id(args.profile)
     m=validate(folder)

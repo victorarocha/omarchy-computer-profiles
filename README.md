@@ -50,6 +50,10 @@ Start on a machine where Omarchy already works well:
 ./ocp apply apple-macpro6-1-d500           # inspect the plan
 ```
 
+Every capture prompts for an author name and requires a nonempty response. The
+name is stored in `profile.json`, included in its README, and displayed by
+`./ocp list`. Older profiles without author metadata display `Unknown`.
+
 Capture reads local files and creates `profiles/<id>/`; it does not change the
 computer's configuration or install software. An existing profile is never
 overwritten: use a new variant ID or edit the original with a reviewed Git diff.
