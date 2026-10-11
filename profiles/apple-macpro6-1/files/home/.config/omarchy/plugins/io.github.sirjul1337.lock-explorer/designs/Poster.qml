@@ -1,0 +1,128 @@
+import QtQuick
+import QtQuick.Effects
+import qs.Commons
+import qs.Commons as Commons
+
+DesignBase {
+  id: lock
+  inputItem: field.input
+
+  readonly property int margin: Math.round(Math.min(width, height) * 0.08)
+  readonly property int bigSize: Math.round(Style.font.baseSize * 22)
+
+  Wallpaper { anchors.fill: parent; lock: lock; blur: 0.0; dim: 0; vignetteTop: 0.2; vignetteMiddle: 0.15; vignetteBottom: 0.55 }
+
+  MouseArea {
+    anchors.fill: parent
+    hoverEnabled: true
+    onClicked: { lock.wakeRequested(); lock.forcePasswordFocus() }
+    onPositionChanged: lock.wakeRequested()
+  }
+
+  Column {
+    anchors.right: parent.right
+    anchors.top: parent.top
+    anchors.rightMargin: lock.margin
+    anchors.topMargin: Math.round(lock.margin * 0.6)
+    spacing: 6
+
+    Column {
+      anchors.right: parent.right
+      spacing: -Math.round(lock.bigSize * 0.22)
+      Text {
+        anchors.right: parent.right
+        text: lock.clock("HH")
+        color: Commons.Color.lock.text
+        font.family: Style.font.family
+        font.pixelSize: lock.bigSize
+        font.weight: Font.Black
+        font.letterSpacing: -8
+        layer.enabled: true
+        layer.effect: MultiEffect { shadowEnabled: true; shadowColor: Qt.rgba(0, 0, 0, 0.6); shadowBlur: 1.0; shadowVerticalOffset: 4 }
+      }
+      Text {
+        anchors.right: parent.right
+        text: lock.clock("mm")
+        color: Commons.Color.lock.borderActive
+        font.family: Style.font.family
+        font.pixelSize: lock.bigSize
+        font.weight: Font.Black
+        font.letterSpacing: -8
+        layer.enabled: true
+        layer.effect: MultiEffect { shadowEnabled: true; shadowColor: Qt.rgba(0, 0, 0, 0.6); shadowBlur: 1.0; shadowVerticalOffset: 4 }
+      }
+    }
+    // Only on a 12-hour clock; the numerals above have no room for it.
+    Text {
+      anchors.right: parent.right
+      visible: lock.meridiem.length > 0
+      text: lock.meridiem
+      color: Commons.Color.lock.borderActive
+      font.family: Style.font.family
+      font.pixelSize: Style.font.heading
+      font.letterSpacing: 6
+    }
+    Item { width: 1; height: Math.round(lock.bigSize * 0.12) }
+    Text {
+      anchors.right: parent.right
+      text: lock.date("dddd").toUpperCase()
+      color: Commons.Color.lock.text
+      font.family: Style.font.family
+      font.pixelSize: Style.font.heading
+      font.letterSpacing: 6
+    }
+    Text {
+      anchors.right: parent.right
+      text: lock.date("d MMMM yyyy").toUpperCase()
+      color: lock.withAlpha(Commons.Color.lock.text, 0.7)
+      font.family: Style.font.family
+      font.pixelSize: Style.font.body
+      font.letterSpacing: 4
+    }
+  }
+
+  Column {
+    anchors.left: parent.left
+    anchors.bottom: parent.bottom
+    anchors.margins: lock.margin
+    spacing: 14
+
+    Row {
+      spacing: 12
+      Avatar {
+        lock: lock
+        width: 40
+        fontSize: Style.font.heading
+        anchors.verticalCenter: parent.verticalCenter
+        shadow: false
+      }
+      Column {
+        anchors.verticalCenter: parent.verticalCenter
+        Text {
+          text: lock.displayName
+          color: Commons.Color.lock.text
+          font.family: Style.font.family
+          font.pixelSize: Style.font.title
+          font.weight: Font.DemiBold
+        }
+        Text {
+          text: lock.errorState ? lock.failureMessage : (lock.authenticatingPassword ? lock.tr("Checking…") : lock.hostName)
+          textFormat: Text.PlainText
+          color: lock.errorState ? Commons.Color.lock.textError : lock.withAlpha(Commons.Color.lock.text, 0.6)
+          font.family: Style.font.family
+          font.pixelSize: Style.font.bodySmall
+        }
+      }
+    }
+
+    PasswordField {
+      id: field
+      lock: lock
+      width: 360
+      height: 52
+      textAlignment: TextInput.AlignLeft
+      placeholder: lock.tr("Password")
+      color: lock.withAlpha(Commons.Color.lock.background, 0.7)
+    }
+  }
+}

@@ -1,0 +1,8 @@
+# gstack writes its runtime state next to the project it is driving: a port,
+# a pid, a token for its localhost endpoint, and network and audit logs of
+# what it browsed. None of it belongs to this plugin, and the token in it was
+# published for a day before anyone noticed. Ignored rather than remembered.
+.gstack/
+
+# An Arch package that wandered in here while testing. Not part of the plugin.
+*.pkg.tar.zst

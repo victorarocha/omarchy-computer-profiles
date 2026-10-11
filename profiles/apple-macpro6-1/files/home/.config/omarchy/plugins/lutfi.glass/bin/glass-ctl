@@ -1,0 +1,282 @@
+#!/usr/bin/env python3
+import sys, subprocess, json, re, os, tempfile
+from pathlib import Path
+
+LOOKNFEEL_FILE = Path.home() / ".config/hypr/looknfeel.lua"
+TOGGLE_FILE = Path.home() / ".local/state/omarchy/toggles/bar-blur"
+BAR_INVERT_FILE = Path.home() / ".local/state/omarchy/toggles/bar-invert"
+BAR_COLOR_FILE = Path.home() / ".local/state/omarchy/toggles/bar-color"
+BAR_MODE_FILE = Path.home() / ".local/state/omarchy/toggles/bar-mode"
+BAR_OPACITY_FILE = Path.home() / ".local/state/omarchy/toggles/bar-opacity"
+USER_SHELL_TOML = Path.home() / ".config/omarchy/shell.toml"
+USER_SHELL_JSON = Path.home() / ".config/omarchy/shell.json"
+THEME_COLORS_TOML = Path.home() / ".local/state/omarchy/current/theme/colors.toml"
+
+_HEX_COLOR_RE = re.compile(r'^#[0-9A-Fa-f]{6}$')
+
+def is_valid_hex_color(s):
+    return bool(s and _HEX_COLOR_RE.match(s))
+
+def atomic_write(path, content):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.", suffix=".tmp")
+    try:
+        os.write(fd, content.encode() if isinstance(content, str) else content)
+        os.fsync(fd)
+        os.close(fd)
+        fd = -1
+        os.replace(tmp, str(path))
+    except BaseException:
+        if fd >= 0:
+            os.close(fd)
+        try:
+            os.unlink(tmp)
+        except OSError:
+            pass
+        raise
+
+
+
+
+def get_option(opt):
+    res = subprocess.run(["hyprctl", "-j", "getoption", opt], capture_output=True, text=True)
+    try:
+        return json.loads(res.stdout)
+    except Exception:
+        return {}
+
+def is_bar_blur_enabled():
+    if TOGGLE_FILE.exists():
+        return TOGGLE_FILE.read_text().strip() in ("true", "1", "yes")
+    if LOOKNFEEL_FILE.exists():
+        content = LOOKNFEEL_FILE.read_text()
+        if "-- @omarchy-glass-start" in content and "-- @omarchy-glass-end" in content:
+            block = content.split("-- @omarchy-glass-start")[1].split("-- @omarchy-glass-end")[0]
+            return "omarchy-bar" in block and "blur = true" in block
+        return "omarchy-bar" in content and "blur = true" in block
+    return False
+def is_bar_invert_enabled():
+    if BAR_INVERT_FILE.exists():
+        return BAR_INVERT_FILE.read_text().strip() in ("true", "1", "yes")
+    return False
+
+def get_bar_custom_color():
+    if BAR_COLOR_FILE.exists():
+        return BAR_COLOR_FILE.read_text().strip()
+    return ""
+def get_bar_mode():
+    if BAR_MODE_FILE.exists():
+        mode = BAR_MODE_FILE.read_text().strip()
+        if mode in ("theme", "theme-direct", "invert", "custom"):
+            return mode
+    if is_bar_invert_enabled():
+        return "invert"
+    if get_bar_custom_color():
+        return "custom"
+    return "theme"
+
+def get_bar_glass_opacity():
+    if BAR_OPACITY_FILE.exists():
+        try:
+            val = float(BAR_OPACITY_FILE.read_text().strip())
+            if 0.0 <= val <= 1.0:
+                return round(val, 2)
+        except Exception:
+            pass
+    return 0.60
+def get_theme_accent():
+    if THEME_COLORS_TOML.exists():
+        for line in THEME_COLORS_TOML.read_text().splitlines():
+            line = line.strip()
+            if line.startswith("accent"):
+                parts = line.split("=")
+                if len(parts) == 2:
+                    return parts[1].strip().strip('"').strip("'")
+    return "#d1583b"
+
+def update_user_shell_toml(bar_mode, bar_color, bar_opacity):
+    sections = {}
+    current_section = None
+    preamble = []
+
+    if USER_SHELL_TOML.exists():
+        for line in USER_SHELL_TOML.read_text().splitlines():
+            header = re.match(r'^\s*\[([A-Za-z0-9_.:-]+)\]\s*$', line)
+            if header:
+                current_section = header.group(1)
+                sections.setdefault(current_section, [])
+                continue
+            if current_section is None:
+                preamble.append(line)
+            else:
+                sections.setdefault(current_section, []).append(line)
+
+    bar_lines = []
+    if current_section != "bar":
+        existing_bar = sections.get("bar", [])
+        for bl in existing_bar:
+            stripped = bl.strip()
+            if stripped.startswith("background-alpha") or stripped.startswith("text"):
+                continue
+            bar_lines.append(bl)
+    else:
+        for bl in sections.get("bar", []):
+            stripped = bl.strip()
+            if stripped.startswith("background-alpha") or stripped.startswith("text"):
+                continue
+            bar_lines.append(bl)
+
+    bar_lines.insert(0, f"background-alpha = {bar_opacity:.2f}")
+    if bar_mode == "custom" and is_valid_hex_color(bar_color):
+        bar_lines.insert(1, f'text = "{bar_color}"')
+    elif bar_mode == "invert":
+        bar_lines.insert(1, 'text = "#0a0a0a"')
+    elif bar_mode in ("theme-direct", "theme-accent"):
+        accent = get_theme_accent()
+        if is_valid_hex_color(accent):
+            bar_lines.insert(1, f'text = "{accent}"')
+
+    sections["bar"] = bar_lines
+
+    output = []
+    for line in preamble:
+        output.append(line)
+    while output and not output[-1].strip():
+        output.pop()
+
+    section_order = list(sections.keys())
+    if "bar" in section_order:
+        section_order.remove("bar")
+        section_order.append("bar")
+
+    for sec in section_order:
+        output.append("")
+        output.append(f"[{sec}]")
+        for line in sections[sec]:
+            output.append(line)
+
+    atomic_write(USER_SHELL_TOML, "\n".join(output) + "\n")
+
+def update_shell_json_transparency(transparent):
+    if USER_SHELL_JSON.exists():
+        try:
+            data = json.loads(USER_SHELL_JSON.read_text())
+            if "bar" in data:
+                cur = data["bar"].get("transparent", True)
+                if cur != transparent:
+                    data["bar"]["transparent"] = transparent
+                    atomic_write(USER_SHELL_JSON, json.dumps(data, indent=2) + "\n")
+        except Exception:
+            pass
+
+
+
+
+def cmd_get():
+    active = get_option("decoration:active_opacity").get("float", 0.88)
+    inactive = get_option("decoration:inactive_opacity").get("float", 0.78)
+    blur_en = get_option("decoration:blur:enabled").get("bool", True)
+    passes = get_option("decoration:blur:passes").get("int", 3)
+    size = get_option("decoration:blur:size").get("int", 6)
+    bar_blur = is_bar_blur_enabled()
+    bar_mode = get_bar_mode()
+    bar_color = get_bar_custom_color()
+    bar_opacity = get_bar_glass_opacity()
+    print(json.dumps({
+        "activeOpacity": round(active, 2),
+        "inactiveOpacity": round(inactive, 2),
+        "blurEnabled": blur_en,
+        "blurPasses": passes,
+        "blurSize": size,
+        "barBlur": bar_blur,
+        "barColorMode": bar_mode,
+        "barInvert": bar_mode == "invert",
+        "barColor": bar_color,
+        "barGlassOpacity": bar_opacity
+    }))
+
+def apply_bar_settings(bar_blur, bar_mode, bar_color, bar_opacity):
+    BAR_MODE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    if bar_mode == "custom" and bar_color and not is_valid_hex_color(bar_color):
+        bar_color = ""
+    atomic_write(BAR_MODE_FILE, f"{bar_mode}\n")
+    atomic_write(BAR_INVERT_FILE, "true\n" if bar_mode == "invert" else "false\n")
+    atomic_write(BAR_COLOR_FILE, f"{bar_color.strip()}\n" if bar_color else "\n")
+    atomic_write(BAR_OPACITY_FILE, f"{bar_opacity:.2f}\n")
+
+    update_user_shell_toml(bar_mode, bar_color, bar_opacity)
+    want_transparent = (not bar_blur) and (bar_mode == "theme")
+    update_shell_json_transparency(want_transparent)
+
+def apply_hyprland(active, inactive, blur_en, passes, size, bar_blur, bar_mode="theme", bar_color="", bar_opacity=0.60):
+    TOGGLE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    atomic_write(TOGGLE_FILE, "true\n" if bar_blur else "false\n")
+    apply_bar_settings(bar_blur, bar_mode, bar_color, bar_opacity)
+    lua_code = f"hl.config({{ decoration = {{ active_opacity = {active:.2f}, inactive_opacity = {inactive:.2f}, blur = {{ enabled = {str(blur_en).lower()}, passes = {passes}, size = {size}, ignore_opacity = true, new_optimizations = true }} }} }})"
+    subprocess.run(["hyprctl", "eval", lua_code], capture_output=True)
+    if bar_blur:
+        bar_lua = 'hl.layer_rule({ match = { namespace = "omarchy-bar" }, blur = true, blur_popups = true, ignore_alpha = 0.0 })'
+        subprocess.run(["hyprctl", "eval", bar_lua], capture_output=True)
+    else:
+        subprocess.run(["hyprctl", "reload"], capture_output=True)
+        subprocess.run(["hyprctl", "eval", lua_code], capture_output=True)
+
+def cmd_set(active, inactive, blur_en, passes, size, bar_blur, bar_mode="theme", bar_color="", bar_opacity=0.60):
+
+    if LOOKNFEEL_FILE.exists():
+        content = LOOKNFEEL_FILE.read_text()
+        bar_rule = '\nhl.layer_rule({ match = { namespace = "omarchy-bar" }, blur = true, blur_popups = true, ignore_alpha = 0.0 })' if bar_blur else ''
+        fenced_block = f"""-- @omarchy-glass-start
+hl.config({{
+  decoration = {{
+    active_opacity = {active:.2f},
+    inactive_opacity = {inactive:.2f},
+    blur = {{
+      enabled = {str(blur_en).lower()},
+      size = {size},
+      passes = {passes},
+      ignore_opacity = true,
+      new_optimizations = true,
+    }},
+  }},
+}}){bar_rule}
+-- @omarchy-glass-end"""
+        if "-- @omarchy-glass-start" in content and "-- @omarchy-glass-end" in content:
+            new_content = re.sub(r"-- @omarchy-glass-start.*?-- @omarchy-glass-end", fenced_block, content, flags=re.DOTALL)
+        else:
+            new_content = content.rstrip() + "\n\n" + fenced_block + "\n"
+        atomic_write(LOOKNFEEL_FILE, new_content)
+    apply_hyprland(active, inactive, blur_en, passes, size, bar_blur, bar_mode, bar_color, bar_opacity)
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2 or sys.argv[1] == "get":
+        cmd_get()
+    elif sys.argv[1] == "live" and len(sys.argv) >= 7:
+        active = float(sys.argv[2])
+        inactive = float(sys.argv[3])
+        blur_en = sys.argv[4].lower() in ("true", "1", "yes")
+        passes = int(sys.argv[5])
+        size = int(sys.argv[6])
+        bar_blur = sys.argv[7].lower() in ("true", "1", "yes") if len(sys.argv) > 7 else is_bar_blur_enabled()
+        bar_mode = sys.argv[8].strip() if len(sys.argv) > 8 else get_bar_mode()
+        if bar_mode in ("true", "1", "yes"): bar_mode = "invert"
+        elif bar_mode in ("false", "0", "no"): bar_mode = "theme"
+        bar_color = sys.argv[9].strip() if len(sys.argv) > 9 else get_bar_custom_color()
+        try: bar_opacity = float(sys.argv[10]) if len(sys.argv) > 10 else get_bar_glass_opacity()
+        except Exception: bar_opacity = get_bar_glass_opacity()
+        apply_hyprland(active, inactive, blur_en, passes, size, bar_blur, bar_mode, bar_color, bar_opacity)
+    elif sys.argv[1] == "set" and len(sys.argv) >= 7:
+        active = float(sys.argv[2])
+        inactive = float(sys.argv[3])
+        blur_en = sys.argv[4].lower() in ("true", "1", "yes")
+        passes = int(sys.argv[5])
+        size = int(sys.argv[6])
+        bar_blur = sys.argv[7].lower() in ("true", "1", "yes") if len(sys.argv) > 7 else is_bar_blur_enabled()
+        bar_mode = sys.argv[8].strip() if len(sys.argv) > 8 else get_bar_mode()
+        if bar_mode in ("true", "1", "yes"): bar_mode = "invert"
+        elif bar_mode in ("false", "0", "no"): bar_mode = "theme"
+        bar_color = sys.argv[9].strip() if len(sys.argv) > 9 else get_bar_custom_color()
+        try: bar_opacity = float(sys.argv[10]) if len(sys.argv) > 10 else get_bar_glass_opacity()
+        except Exception: bar_opacity = get_bar_glass_opacity()
+        cmd_set(active, inactive, blur_en, passes, size, bar_blur, bar_mode, bar_color, bar_opacity)

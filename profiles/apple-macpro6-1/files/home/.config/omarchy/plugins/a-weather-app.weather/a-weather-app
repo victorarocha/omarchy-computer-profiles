@@ -1,0 +1,66 @@
+#!/usr/bin/bash
+# Source-checkout/plugin launcher. The packaged command is the compiled Go executable.
+set -euo pipefail
+app_source=$(dirname -- "$(realpath -- "$0")")
+source "$app_source/scripts/runtime_paths.sh"
+if [[ -x "$app_source/build/a-weather-app" ]]; then
+  weather_open_directory "$app_source/build" 0 0
+  weather_open_file "$weather_dir_fd" a-weather-app
+  exec "/proc/self/fd/$weather_file_fd" "$@"
+fi
+data_home=${XDG_DATA_HOME:-${HOME:-}/.local/share}
+if [[ "$data_home" == /* && ( -e "$data_home/a-weather-app" || -L "$data_home/a-weather-app" ) ]]; then
+  weather_open_directory "$data_home" 0
+  weather_open_child "$weather_dir_fd" a-weather-app 0 0 1
+  app_fd=$weather_child_fd
+  current="/proc/self/fd/$app_fd/current"
+  if [[ -e $current || -L $current ]]; then
+    selection=$(readlink -- "$current") || { weather_path_error current; exit 1; }
+    [[ $selection =~ ^releases/v0\.[1-9][0-9]*\.(0|[1-9][0-9]*)$ ]] || { weather_path_error current; exit 1; }
+    weather_open_child "$app_fd" releases 0 0 1
+    weather_open_child "$weather_child_fd" "${selection#releases/}" 0 0 1
+    release_fd=$weather_child_fd
+    weather_check_tree "$release_fd"
+    weather_open_file "$release_fd" a-weather-app
+    [[ -x /proc/self/fd/$weather_file_fd ]] || { weather_path_error a-weather-app; exit 1; }
+    for argument in "$@"; do
+      if [[ $argument == --install-update ]]; then
+        runtime_help=$("/proc/self/fd/$weather_file_fd" --help 2>&1)
+        if [[ $runtime_help != *-install-update* ]]; then
+          exec bash "$app_source/scripts/bootstrap_update.sh" "$@"
+        fi
+      fi
+    done
+    for argument in "$@"; do
+      if [[ $argument == --bar ]]; then
+        bar_output=$("/proc/self/fd/$weather_file_fd" "$@")
+        if command -v jq >/dev/null && jq -e 'type == "object" and .schema_version == 1 and .update == null' <<<"$bar_output" >/dev/null 2>&1; then
+          state_path=${XDG_STATE_HOME:-${HOME:-}/.local/state}/a-weather-app
+          previous=
+          for state_argument in "$@"; do
+            if [[ $previous == --state-dir ]]; then state_path=$state_argument; fi
+            previous=$state_argument
+          done
+          if enhanced=$(bash "$app_source/scripts/bar_release_status.sh" "${selection#releases/v}" "$state_path" <<<"$bar_output" 2>/dev/null); then
+            printf '%s\n' "$enhanced"
+            exit 0
+          fi
+        fi
+        printf '%s\n' "$bar_output"
+        exit 0
+      fi
+    done
+    exec "/proc/self/fd/$weather_file_fd" "$@"
+  fi
+fi
+for argument in "$@"; do
+  if [[ "$argument" == --bar ]]; then
+    printf '%s\n' '{"schema_version":1,"label":"Install weather app","tooltip":"Run the release runtime installer from the plugin README","freshness":"unavailable"}'
+    exit 0
+  fi
+  if [[ "$argument" == --refresh-bar ]]; then
+    exit 0
+  fi
+done
+printf 'Install the release runtime with: bash %s/scripts/install_release_runtime.sh\n' "$app_source" >&2
+exit 1

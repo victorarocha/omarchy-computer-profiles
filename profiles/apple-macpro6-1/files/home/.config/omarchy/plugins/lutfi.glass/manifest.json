@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "lutfi.glass",
+  "name": "Glass & Blur",
+  "version": "1.0.0",
+  "author": "Lutfi Zain",
+  "license": "MIT",
+  "description": "Adjust window opacity, transparency, and glass blur from the bar",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Glass & Blur",
+    "description": "Adjust window transparency and blur",
+    "category": "Appearance",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

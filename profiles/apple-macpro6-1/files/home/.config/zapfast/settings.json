@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "theme": "dark",
+  "font": "system",
+  "interface_language": null,
+  "zoom": 1.0,
+  "sidebar_width": 320.0,
+  "enter_sends": true,
+  "show_shortcut_hints": true,
+  "keep_running_in_background": true,
+  "notifications": true,
+  "voice_speed": 1.0,
+  "pause_other_media": true
+}

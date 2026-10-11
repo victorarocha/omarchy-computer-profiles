@@ -1,0 +1,1522 @@
+#!/bin/bash
+#
+# bing-wallpaper - fetch the Bing image of the day, make it the Omarchy
+# wallpaper, and (optionally) build a matching "Bing" theme with Aether.
+#
+# Usage:
+#   bing-wallpaper fetch [--force] [--day N] [--date YYYY-MM-DD] [--market MKT] [--mode dark|light|auto]
+#                                    --day N picks the image from N days ago (0-7)
+#   bing-wallpaper apply <when>      Switch to an archived picture: a date, an image
+#                                    id from 'archive', or N days ago
+#   bing-wallpaper archive           Print this week's pictures and their palettes as JSON
+#   bing-wallpaper status            Print the current state as JSON
+#   bing-wallpaper settings          Print the effective settings as JSON
+#   bing-wallpaper set <key> <val>   Update one setting inline in shell.json
+#   bing-wallpaper open [when]       Open the story behind a picture in the browser
+#   bing-wallpaper backgrounds       Open the generated backgrounds folder
+#   bing-wallpaper next              Print when the next Bing image is expected
+#   bing-wallpaper install-deps      Install ImageMagick (needed by the screensaver)
+#   bing-wallpaper lock-screen       Re-sync the Bing lock screen design with the setting
+#   bing-wallpaper parallax          Drift the screensaver between effects (run by the service)
+#
+# Settings are read from the plugin's inline entry in ~/.config/omarchy/shell.json
+# (see README). Every setting can also be overridden with an environment variable
+# of the form BING_WALLPAPER_<KEY>, e.g. BING_WALLPAPER_MARKET=de-DE.
+
+set -o pipefail
+
+# --------------------------------------------------------- execution boundary
+#
+# Nothing below is resolved through an inherited PATH. The service runs this
+# script unattended every fifteen minutes, so a writable directory sitting
+# early on somebody's PATH must not get to decide what `curl` or `jq` means.
+# PATH is pinned to trusted system directories before anything runs, the
+# command hash is dropped so no inherited entry survives, and the helpers that
+# consume remote bytes or move files into place are additionally resolved once
+# to an absolute path and called through it for the rest of the run.
+#
+# The service closes the same boundary from its side by launching this script
+# with a cleared environment (see Service.qml); pinning PATH here as well keeps
+# a hand-run from a hostile shell honest too.
+BING_TRUSTED_BIN_DIRS=(/usr/bin /bin /usr/share/omarchy/bin /usr/local/bin)
+PATH=$(IFS=:; printf '%s' "${BING_TRUSTED_BIN_DIRS[*]}")
+export PATH
+hash -r
+unset -v BASH_ENV CDPATH ENV GLOBIGNORE LD_AUDIT LD_LIBRARY_PATH LD_PRELOAD
+IFS=$' \t\n'
+
+# Absolute path of <name> under a trusted directory, or failure. Never looks at
+# PATH, so it stays correct even if something later in the run changes it.
+resolve_tool() {
+  local name="$1" dir
+  case "$name" in ''|*/*) return 1 ;; esac
+  for dir in "${BING_TRUSTED_BIN_DIRS[@]}"; do
+    if [[ -f "$dir/$name" && -x "$dir/$name" ]]; then
+      printf '%s' "$dir/$name"
+      return 0
+    fi
+  done
+  return 1
+}
+
+CURL=$(resolve_tool curl) || CURL=""
+JQ=$(resolve_tool jq) || JQ=""
+FILE=$(resolve_tool file) || FILE=""
+HEAD=$(resolve_tool head) || HEAD=""
+STAT=$(resolve_tool stat) || STAT=""
+MV=$(resolve_tool mv) || MV=""
+AWK=$(resolve_tool awk) || AWK=""
+readonly CURL JQ FILE HEAD STAT MV AWK
+
+if [[ -z $JQ || -z $HEAD || -z $STAT || -z $MV ]]; then
+  printf 'bing-wallpaper: required tools are missing from %s\n' "${BING_TRUSTED_BIN_DIRS[*]}" >&2
+  exit 1
+fi
+
+# The service collects this script's stderr into a buffer that has no limit of
+# its own, so the ceiling belongs here, at the producer. Both streams go
+# through a limiter that keeps draining its pipe for the whole run and simply
+# stops forwarding past the ceiling -- draining rather than closing means a
+# chatty helper gets no SIGPIPE and still finishes normally. Only the
+# service-driven subcommands are capped; `status`, `archive` and `settings`
+# print structured output a caller is entitled to in full.
+BING_OUTPUT_MAX_BYTES=65536
+BING_OUTPUT_LIMITER='
+  {
+    n += length($0) + 1
+    if (n <= max) { print; fflush() }
+    else if (!cut) { print "bing-wallpaper: " tag " truncated at " max " bytes"; fflush(); cut = 1 }
+  }'
+
+bound_output() {
+  [[ -n $AWK ]] || return 0
+  exec 3>&1 4>&2
+  exec 1> >(exec "$AWK" -v max="$BING_OUTPUT_MAX_BYTES" -v tag=stdout "$BING_OUTPUT_LIMITER" >&3)
+  exec 2> >(exec "$AWK" -v max="$BING_OUTPUT_MAX_BYTES" -v tag=stderr "$BING_OUTPUT_LIMITER" >&4)
+}
+
+# Anything this script started belongs to this script. The service runs us
+# under `timeout`, which owns the process group and escalates TERM to KILL, but
+# a signal that arrives while we are between helpers should still take our own
+# background children (the socat reading Hyprland's event socket, a sleep) with
+# it rather than leaving them behind.
+BING_CHILD_PIDS=()
+bw_track_child() { [[ -n ${1:-} ]] && BING_CHILD_PIDS+=("$1"); }
+bw_terminate() {
+  local pid
+  trap - TERM INT HUP
+  for pid in "${BING_CHILD_PIDS[@]}"; do
+    [[ -n $pid ]] && kill -TERM "$pid" 2>/dev/null
+  done
+  exit 143
+}
+trap bw_terminate TERM INT HUP
+
+PLUGIN_ID="io.github.chrisandtre.bing-wallpaper"
+THEME_NAME="bing"
+
+CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+SHELL_JSON="$CONFIG_HOME/omarchy/shell.json"
+THEME_DIR="$CONFIG_HOME/omarchy/themes/$THEME_NAME"
+BACKGROUNDS_DIR="$THEME_DIR/backgrounds"
+BRANDING_DIR="$CONFIG_HOME/omarchy/branding"
+SCREENSAVER_FILE="$BRANDING_DIR/screensaver.txt"
+STATE_DIR="$STATE_HOME/bing-wallpaper"
+STATE_FILE="$STATE_DIR/state.json"
+ARCHIVE_FILE="$STATE_DIR/archive.json"
+SCREENSAVER_BACKUP="$STATE_DIR/screensaver.txt.orig"
+LOCK_FILE="${XDG_RUNTIME_DIR:-/tmp}/bing-wallpaper.lock"
+PLUGIN_ROOT=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")/.." && pwd)
+# The lock screen design is handed to Lock Screen Explorer, which loads any
+# .qml in lock-designs/ and names it after the file (Bing.qml -> my-bing).
+LOCK_DESIGN_SRC="$PLUGIN_ROOT/lock/Bing.qml"
+LOCK_DESIGNS_DIR="$CONFIG_HOME/omarchy/lock-designs"
+LOCK_DESIGN_FILE="$LOCK_DESIGNS_DIR/Bing.qml"
+LOCK_DESIGN_ID="my-bing"
+
+BING_HOST="https://www.bing.com"
+# Bing's archive API serves at most the last eight pictures (idx 0..7).
+BING_ARCHIVE_MAX=8
+# Ceilings on what we accept from the network. The metadata for a week is a
+# few KB; a UHD JPEG from Bing is 1-6 MB. Anything past these is not a Bing
+# response we want, whatever it is, and is cut off at the producer before jq,
+# file, ImageMagick, Aether or the panel ever see it.
+BING_META_MAX_BYTES=262144        # 256 KiB
+BING_IMAGE_MAX_BYTES=26214400     # 25 MiB per picture
+BING_STORE_MAX_BYTES=419430400    # 400 MiB for the whole backgrounds folder
+
+# Setting name -> default. Keep in sync with README.md and Model.js.
+declare -A DEFAULTS=(
+  [market]="en-US"
+  [mode]="dark"
+  [extractMode]="normal"
+  [applyTheme]="true"
+  [retentionDays]="7"
+  [notify]="true"
+  [lightStart]="7"
+  [lightEnd]="19"
+  [resolution]="UHD"
+  [screensaver]="true"
+  [screensaverSize]="120x29"
+  [screensaverStyle]="auto"
+  [screensaverCaption]="true"
+  [lockScreen]="false"
+  [screensaverParallax]="true"
+)
+
+log() { printf '%s\n' "$*" >&2; }
+fail() { log "bing-wallpaper: $*"; exit 1; }
+
+need() {
+  for tool in "$@"; do
+    resolve_tool "$tool" >/dev/null || fail "$tool is required but not installed"
+  done
+}
+
+# ------------------------------------------------------------------ settings
+
+# Find our inline entry anywhere shell.json can hold it: the bar layout
+# sections for a bar widget, or plugins[] for a headless install.
+setting_entry() {
+  [[ -f $SHELL_JSON ]] || { echo '{}'; return; }
+  "$JQ" -c --arg id "$PLUGIN_ID" '
+    [
+      (.bar.layout // {} | .left // [], .center // [], .right // [] | .[]),
+      (.plugins // [] | .[])
+    ]
+    | map(select(type == "object" and .id == $id))
+    | .[0] // {}
+  ' "$SHELL_JSON" 2>/dev/null || echo '{}'
+}
+
+load_settings() {
+  local entry key env_key value
+  entry=$(setting_entry)
+  declare -gA SETTINGS=()
+  for key in "${!DEFAULTS[@]}"; do
+    value=$("$JQ" -r --arg k "$key" '.[$k] // empty' <<<"$entry")
+    env_key="BING_WALLPAPER_$(tr '[:lower:]' '[:upper:]' <<<"$key")"
+    if [[ -n ${!env_key:-} ]]; then
+      value="${!env_key}"
+    fi
+    SETTINGS[$key]="${value:-${DEFAULTS[$key]}}"
+  done
+}
+
+print_settings() {
+  local key first=1
+  printf '{'
+  for key in $(printf '%s\n' "${!SETTINGS[@]}" | sort); do
+    (( first )) || printf ','
+    first=0
+    printf '"%s":%s' "$key" "$("$JQ" -Rn --arg v "${SETTINGS[$key]}" '$v')"
+  done
+  printf '}\n'
+}
+
+valid_setting_value() {
+  local key="$1" value="$2"
+  case "$key" in
+    market)        [[ $value =~ ^[a-z]{2}-[A-Z]{2}$ ]] ;;
+    mode)          [[ $value =~ ^(dark|light|auto)$ ]] ;;
+    extractMode)   [[ $value =~ ^[a-z-]+$ ]] ;;
+    applyTheme)    [[ $value =~ ^(true|false)$ ]] ;;
+    notify)        [[ $value =~ ^(true|false)$ ]] ;;
+    retentionDays) [[ $value =~ ^[0-9]+$ ]] && (( value >= 1 && value <= 365 )) ;;
+    lightStart)    [[ $value =~ ^[0-9]+$ ]] && (( value >= 0 && value <= 23 )) ;;
+    lightEnd)      [[ $value =~ ^[0-9]+$ ]] && (( value >= 0 && value <= 24 )) ;;
+    resolution)    [[ $value =~ ^(UHD|1920x1200|1920x1080)$ ]] ;;
+    screensaver)   [[ $value =~ ^(true|false)$ ]] ;;
+    screensaverSize)
+      [[ $value =~ ^([0-9]{2,3})x([0-9]{2,3})$ ]] &&
+        (( BASH_REMATCH[1] >= 20 && BASH_REMATCH[1] <= 400 )) &&
+        (( BASH_REMATCH[2] >= 8 && BASH_REMATCH[2] <= 100 )) ;;
+    screensaverStyle)    [[ $value =~ ^(auto|mono|color|depth)$ ]] ;;
+    screensaverCaption)  [[ $value =~ ^(true|false)$ ]] ;;
+    screensaverParallax) [[ $value =~ ^(true|false)$ ]] ;;
+    lockScreen)          [[ $value =~ ^(true|false)$ ]] ;;
+    *) return 1 ;;
+  esac
+}
+
+# Write one setting onto our inline entry. The shell hot-reloads shell.json,
+# so the widget picks the change up immediately.
+set_setting() {
+  local key="$1" value="$2" tmp jq_value
+  [[ -n ${DEFAULTS[$key]+_} ]] || fail "unknown setting '$key' (known: ${!DEFAULTS[*]})"
+  valid_setting_value "$key" "$value" || fail "invalid value '$value' for $key"
+  [[ -f $SHELL_JSON ]] || fail "$SHELL_JSON does not exist; enable the plugin first"
+
+  case "$value" in
+    true | false) jq_value="$value" ;;
+    *) if [[ $value =~ ^[0-9]+$ ]]; then jq_value="$value"; else jq_value=$("$JQ" -Rn --arg v "$value" '$v'); fi ;;
+  esac
+
+  tmp=$(mktemp "$SHELL_JSON.XXXXXX")
+  if jq --arg id "$PLUGIN_ID" --arg key "$key" --argjson value "$jq_value" '
+    def patch: if type == "array" then map(if type == "object" and .id == $id then .[$key] = $value else . end) else . end;
+    .bar.layout.left |= patch
+    | .bar.layout.center |= patch
+    | .bar.layout.right |= patch
+    | .plugins |= patch
+  ' "$SHELL_JSON" >"$tmp"; then
+    "$MV" "$tmp" "$SHELL_JSON"
+  else
+    rm -f "$tmp"
+    fail "could not update $SHELL_JSON"
+  fi
+}
+
+# ------------------------------------------------------------------- state
+
+read_state() {
+  [[ -f $STATE_FILE ]] && "$JQ" -c . "$STATE_FILE" 2>/dev/null || echo '{}'
+}
+
+state_get() {
+  read_state | "$JQ" -r --arg k "$1" '.[$k] // empty'
+}
+
+# write_state key=value ... (values are JSON-encoded as strings unless they
+# look like numbers/booleans/null).
+write_state() {
+  local args=() pair key value
+  mkdir -p "$STATE_DIR"
+  for pair in "$@"; do
+    key="${pair%%=*}"
+    value="${pair#*=}"
+    if [[ $value =~ ^(-?[0-9]+|true|false|null)$ ]]; then
+      args+=(--argjson "$key" "$value")
+    else
+      args+=(--arg "$key" "$value")
+    fi
+  done
+  local filter='.'
+  for pair in "$@"; do
+    key="${pair%%=*}"
+    filter+=" | .[\"$key\"] = \$$key"
+  done
+  local tmp
+  tmp=$(mktemp "$STATE_DIR/state.XXXXXX")
+  read_state | "$JQ" "${args[@]}" "$filter" >"$tmp" && "$MV" "$tmp" "$STATE_FILE"
+}
+
+now_epoch() { date +%s; }
+now_iso() { date -Iseconds; }
+
+# ------------------------------------------------------------------- modes
+
+# Resolve "auto" into the mode that applies right now.
+effective_mode() {
+  local mode="${SETTINGS[mode]}" hour
+  if [[ $mode == auto ]]; then
+    hour=$(date +%-H)
+    if (( hour >= SETTINGS[lightStart] && hour < SETTINGS[lightEnd] )); then
+      echo light
+    else
+      echo dark
+    fi
+  else
+    echo "$mode"
+  fi
+}
+
+# Epoch of the next boundary where an "auto" mode flips, or empty.
+next_mode_flip() {
+  [[ ${SETTINGS[mode]} == auto ]] || return 0
+  local today hour
+  today=$(date +%F)
+  hour=$(date +%-H)
+  # Build the epoch first and add a day arithmetically: GNU date reads a
+  # trailing "+ 1 day" in a datetime string as a "+1" timezone offset.
+  if (( hour < SETTINGS[lightStart] )); then
+    date -d "$today ${SETTINGS[lightStart]}:00" +%s
+  elif (( hour < SETTINGS[lightEnd] )); then
+    date -d "$today ${SETTINGS[lightEnd]}:00" +%s
+  else
+    echo $(( $(date -d "$today ${SETTINGS[lightStart]}:00" +%s) + 86400 ))
+  fi
+}
+
+# ------------------------------------------------------------------- bing
+
+# The last BING_ARCHIVE_MAX pictures for a market, newest first, as a JSON
+# array. One call covers today's image and the week behind it.
+# Fetch a URL into $2 with a hard byte ceiling $3. head(1) is the producer
+# limit: it stops reading at ceiling+1 bytes no matter what the server sends or
+# whether it announced a length, and the transfer is then rejected as
+# oversized. curl's --max-filesize additionally refuses up front when a length
+# is announced. Nothing downstream sees a byte of an oversized response.
+fetch_bounded() {
+  local url="$1" dest="$2" max="$3" size
+  "$CURL" -fsSL --max-time "${4:-60}" --max-filesize "$max" --proto '=https' "$url" 2>/dev/null |
+    "$HEAD" -c "$(( max + 1 ))" >"$dest"
+  [[ ${PIPESTATUS[0]} -eq 0 ]] || { rm -f "$dest"; return 1; }
+  size=$("$STAT" -c %s "$dest" 2>/dev/null) || { rm -f "$dest"; return 1; }
+  if (( size > max )); then
+    log "rejected oversized response from $url (> $max bytes)"
+    rm -f "$dest"
+    return 1
+  fi
+  (( size > 0 ))
+}
+
+fetch_metadata() {
+  local market="$1" tmp
+  tmp=$(mktemp) || return 1
+  if ! fetch_bounded "$BING_HOST/HPImageArchive.aspx?format=js&idx=0&n=$BING_ARCHIVE_MAX&mkt=$market" \
+       "$tmp" "$BING_META_MAX_BYTES" 20; then
+    rm -f "$tmp"
+    return 1
+  fi
+  # Only well-formed image records, and never more than we asked for.
+  "$JQ" -c --argjson n "$BING_ARCHIVE_MAX" \
+    '.images // [] | map(select(type == "object")) | .[:$n]' "$tmp" 2>/dev/null
+  local rc=$?
+  rm -f "$tmp"
+  return $rc
+}
+
+# The story link comes from Bing's metadata and ends up in a browser, so it is
+# only accepted as an https URL on bing.com itself: no other host, no
+# credentials, no explicit port, no other scheme, nothing unprintable. Anything
+# else becomes "" and the panel simply shows no story button.
+sanitize_link() {
+  local link="$1"
+  [[ $link =~ ^https://(www\.)?bing\.com(/[[:graph:]]*)?$ ]] || { echo ""; return; }
+  [[ ${link%%/*} != *@* ]] || { echo ""; return; }
+  echo "$link"
+}
+
+# Derive the pieces we name files and state after from one Bing image record.
+# Sets: META_STARTDATE META_FULLSTART META_URLBASE META_TITLE META_COPYRIGHT
+#       META_LINK META_NAME META_DATE META_ID META_IMAGE
+parse_image_meta() {
+  local meta="$1" market="$2"
+  META_STARTDATE=$("$JQ" -r '.startdate // ""' <<<"$meta")
+  META_FULLSTART=$("$JQ" -r '.fullstartdate // ""' <<<"$meta")
+  META_URLBASE=$("$JQ" -r '.urlbase // ""' <<<"$meta")
+  META_TITLE=$("$JQ" -r '.title // ""' <<<"$meta")
+  META_COPYRIGHT=$("$JQ" -r '.copyright // ""' <<<"$meta")
+  META_LINK=$(sanitize_link "$("$JQ" -r '.copyrightlink // "" | if type == "string" then . else "" end' <<<"$meta")")
+  # "/th?id=OHR.AZWilderness_EN-US4070936347" -> "AZWilderness"
+  META_NAME=$(sed -E 's/.*id=OHR\.([A-Za-z0-9]+)_.*/\1/' <<<"$META_URLBASE")
+  [[ -n $META_NAME && $META_NAME != "$META_URLBASE" ]] || META_NAME="bing"
+  META_DATE="${META_STARTDATE:0:4}-${META_STARTDATE:4:2}-${META_STARTDATE:6:2}"
+  META_ID="${META_STARTDATE}-${market}-${META_NAME}"
+  META_IMAGE="$BACKGROUNDS_DIR/$META_DATE-$META_NAME-$market.jpg"
+}
+
+# The Bing archive gives fullstartdate as UTC "YYYYMMDDHHMM"; the next image
+# lands 24h later. Returns epoch seconds.
+next_image_epoch() {
+  local fullstart="$1" y m d hh mm
+  [[ $fullstart =~ ^([0-9]{4})([0-9]{2})([0-9]{2})([0-9]{2})([0-9]{2})$ ]] || return 1
+  y=${BASH_REMATCH[1]}; m=${BASH_REMATCH[2]}; d=${BASH_REMATCH[3]}
+  hh=${BASH_REMATCH[4]}; mm=${BASH_REMATCH[5]}
+  local start
+  start=$(date -u -d "$y-$m-${d}T$hh:$mm:00Z" +%s) || return 1
+  echo $(( start + 86400 ))
+}
+
+# Bytes currently held in the backgrounds folder.
+backgrounds_bytes() {
+  du -sb "$BACKGROUNDS_DIR" 2>/dev/null | awk '{ print $1 + 0 }'
+}
+
+download_image() {
+  local urlbase="$1" dest="$2" res tmp used
+  # urlbase is a path fragment from the metadata; only the shape Bing uses.
+  [[ $urlbase =~ ^/th\?id=OHR\.[A-Za-z0-9_.-]+$ ]] || return 1
+  # Keep the whole store bounded even if every picture were the maximum size.
+  used=$(backgrounds_bytes)
+  if (( ${used:-0} + BING_IMAGE_MAX_BYTES > BING_STORE_MAX_BYTES )); then
+    log "backgrounds folder is at its size limit; not downloading"
+    return 1
+  fi
+  tmp="$dest.part"
+  for res in "${SETTINGS[resolution]}" 1920x1200 1920x1080; do
+    if fetch_bounded "$BING_HOST${urlbase}_${res}.jpg" "$tmp" "$BING_IMAGE_MAX_BYTES" 120 &&
+       "$FILE" -b --mime-type "$tmp" | grep -q '^image/'; then
+      "$MV" "$tmp" "$dest"
+      echo "$res"
+      return 0
+    fi
+    rm -f "$tmp"
+  done
+  return 1
+}
+
+prune_backgrounds() {
+  local keep_days="${SETTINGS[retentionDays]}" cutoff file stamp
+  cutoff=$(date -d "-$keep_days days" +%s)
+  rm -f -- "$BACKGROUNDS_DIR"/*.part 2>/dev/null
+  for file in "$BACKGROUNDS_DIR"/????-??-??-*; do
+    [[ -f $file ]] || continue
+    stamp=$(basename "$file" | cut -c1-10)
+    if [[ $stamp =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] && (( $(date -d "$stamp" +%s 2>/dev/null || echo 0) < cutoff )); then
+      rm -f -- "$file"
+    fi
+  done
+}
+
+# ----------------------------------------------------------------- archive
+
+# The archive is the week of pictures behind today's, each with the palette
+# Aether would build from it in the current mode and style. It lets the panel
+# show what switching pictures would do to the theme before anyone commits.
+# Written to archive.json; the panel watches that file.
+
+# How many pictures to keep in the archive: a week by default, never more
+# than Bing serves.
+archive_count() {
+  local n="${SETTINGS[retentionDays]}"
+  (( n > BING_ARCHIVE_MAX )) && n=$BING_ARCHIVE_MAX
+  (( n < 1 )) && n=1
+  echo "$n"
+}
+
+read_archive() {
+  [[ -f $ARCHIVE_FILE ]] && "$JQ" -c . "$ARCHIVE_FILE" 2>/dev/null || echo '{}'
+}
+
+archive_get() {
+  read_archive | "$JQ" -r --arg k "$1" '.[$k] // empty'
+}
+
+# Extract the palette Aether would build for an image, as a JSON object of
+# colour name -> hex (background, foreground, accent, color0..color15, ...).
+# Prints null when Aether is missing or fails; takes about 50 ms otherwise.
+extract_palette() {
+  local image="$1" mode="$2" extract_mode="$3" work
+  command -v aether >/dev/null 2>&1 || { echo null; return 0; }
+  work=$(mktemp -d)
+  local -a args=(--generate "$image" --no-apply --output "$work" --extract-mode "$extract_mode" --no-zed --no-vscode --no-neovim)
+  [[ $mode == light ]] && args+=(--light-mode)
+  if aether "${args[@]}" >/dev/null 2>&1 && [[ -f $work/colors.toml ]]; then
+    awk -F'"' '
+      /^[a-zA-Z0-9_]+[[:space:]]*=[[:space:]]*"#[0-9a-fA-F]{6}"/ {
+        key = $0; sub(/[[:space:]]*=.*/, "", key); print key "\t" $2
+      }' "$work/colors.toml" |
+      "$JQ" -Rn '[inputs | split("\t") | {key: .[0], value: .[1]}] | from_entries'
+  else
+    echo null
+  fi
+  rm -rf "$work"
+}
+
+# One archive entry. $3 is the on-disk image or empty while it is still
+# pending; $4 is the palette JSON (object or null).
+archive_entry() {
+  local meta="$1" market="$2" image="$3" colors="$4" day="$5"
+  parse_image_meta "$meta" "$market"
+  "$JQ" -cn \
+    --arg id "$META_ID" --arg date "$META_DATE" --argjson day "$day" \
+    --arg title "$META_TITLE" --arg copyright "$META_COPYRIGHT" --arg link "$META_LINK" \
+    --arg image "$image" --arg market "$market" --argjson colors "$colors" \
+    '{id: $id, date: $date, day: $day, title: $title, copyright: $copyright,
+      link: $link, market: $market, image: (if $image == "" then null else $image end),
+      colors: $colors}'
+}
+
+# Write archive.json from a JSON array of entries.
+write_archive() {
+  local entries="$1" market="$2" mode="$3" extract_mode="$4" wanted="$5" status="$6" tmp
+  mkdir -p "$STATE_DIR"
+  tmp=$(mktemp "$STATE_DIR/archive.XXXXXX")
+  "$JQ" -n --arg market "$market" --arg mode "$mode" --arg extractMode "$extract_mode" \
+    --argjson wanted "$wanted" --arg status "$status" --arg updatedAt "$(now_iso)" \
+    --argjson entries "$entries" \
+    '{market: $market, mode: $mode, extractMode: $extractMode, wanted: $wanted,
+      status: $status, updatedAt: $updatedAt, entries: $entries}' >"$tmp" &&
+    "$MV" "$tmp" "$ARCHIVE_FILE"
+}
+
+# Bring the archive in line with the metadata we just fetched: download any
+# picture we do not have yet, oldest last, and record each one's palette.
+# The file is rewritten after every download so the panel fills in as it goes,
+# which matters most on the very first run when a whole week comes down.
+sync_archive() {
+  local images="$1" market="$2" mode="$3" extract_mode="${SETTINGS[extractMode]}"
+  local wanted total count i meta entries='[]' entry colors image missing=0 done=0
+
+  wanted=$(archive_count)
+  total=$("$JQ" 'length' <<<"$images")
+  count=$wanted
+  (( count > total )) && count=$total
+
+  # Palettes already computed for this mode and style are reused; only a new
+  # picture or a changed setting costs an Aether run.
+  local previous='{}'
+  if [[ $(archive_get mode) == "$mode" && $(archive_get extractMode) == "$extract_mode" ]]; then
+    previous=$(read_archive | "$JQ" -c '[.entries[]? | select(.colors != null) | {key: .id, value: .colors}] | from_entries')
+  fi
+
+  # Pass one: what we already have, so the panel can show placeholders for the
+  # rest straight away.
+  for (( i = 0; i < count; i++ )); do
+    meta=$("$JQ" -c ".[$i]" <<<"$images")
+    parse_image_meta "$meta" "$market"
+    if [[ -s $META_IMAGE ]]; then
+      colors=$("$JQ" -c --arg id "$META_ID" '.[$id] // null' <<<"$previous")
+      [[ $colors != null ]] || colors=$(extract_palette "$META_IMAGE" "$mode" "$extract_mode")
+      entry=$(archive_entry "$meta" "$market" "$META_IMAGE" "$colors" "$i")
+    else
+      (( missing++ ))
+      entry=$(archive_entry "$meta" "$market" "" null "$i")
+    fi
+    entries=$("$JQ" -c --argjson e "$entry" '. + [$e]' <<<"$entries")
+  done
+
+  if (( missing == 0 )); then
+    write_archive "$entries" "$market" "$mode" "$extract_mode" "$wanted" ready
+    write_state archive=ready archiveProgress=""
+    return 0
+  fi
+
+  write_archive "$entries" "$market" "$mode" "$extract_mode" "$wanted" downloading
+  write_state archive=downloading archiveProgress="0/$missing"
+  log "bing-wallpaper: downloading $missing archived picture(s)"
+
+  # Pass two: fetch what is missing, newest first.
+  for (( i = 0; i < count; i++ )); do
+    image=$("$JQ" -r ".[$i].image // empty" <<<"$entries")
+    [[ -z $image ]] || continue
+    meta=$("$JQ" -c ".[$i]" <<<"$images")
+    parse_image_meta "$meta" "$market"
+    if download_image "$META_URLBASE" "$META_IMAGE" >/dev/null; then
+      colors=$(extract_palette "$META_IMAGE" "$mode" "$extract_mode")
+      entry=$(archive_entry "$meta" "$market" "$META_IMAGE" "$colors" "$i")
+      entries=$("$JQ" -c --argjson i "$i" --argjson e "$entry" '.[$i] = $e' <<<"$entries")
+    else
+      log "could not download $META_URLBASE"
+    fi
+    (( done++ ))
+    write_archive "$entries" "$market" "$mode" "$extract_mode" "$wanted" downloading
+    write_state archiveProgress="$done/$missing"
+  done
+
+  local still_missing
+  still_missing=$("$JQ" '[.[] | select(.image == null)] | length' <<<"$entries")
+  if (( still_missing > 0 )); then
+    write_archive "$entries" "$market" "$mode" "$extract_mode" "$wanted" partial
+    write_state archive=partial archiveProgress=""
+  else
+    write_archive "$entries" "$market" "$mode" "$extract_mode" "$wanted" ready
+    write_state archive=ready archiveProgress=""
+  fi
+}
+
+# Resolve "what the user pointed at" -- a date, an archive id, or N days
+# ago -- into the archive entry's date. Prints the date or nothing.
+archive_lookup_date() {
+  local key="$1"
+  if [[ $key =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]; then
+    echo "$key"
+  elif [[ $key =~ ^[0-9]$ ]]; then
+    read_archive | "$JQ" -r --argjson d "$key" '.entries[]? | select(.day == $d) | .date' | "$HEAD" -1
+  else
+    read_archive | "$JQ" -r --arg k "$key" '.entries[]? | select(.id == $k) | .date' | "$HEAD" -1
+  fi
+}
+
+# ------------------------------------------------------------------- theme
+
+# Aether writes a colors.toml whose shade names differ slightly from the ones
+# Omarchy's templates read (lighter_bg vs lighter_background, ...). Emit a
+# colors.toml carrying both spellings so every template resolves.
+normalize_colors() {
+  local src="$1" dest="$2" line key value
+  declare -A colors=()
+  local -a order=()
+  while IFS= read -r line; do
+    [[ $line =~ ^[[:space:]]*([a-zA-Z0-9_]+)[[:space:]]*=[[:space:]]*\"([^\"]*)\" ]] || continue
+    key=${BASH_REMATCH[1]}
+    value=${BASH_REMATCH[2]}
+    colors[$key]="$value"
+    order+=("$key")
+  done <"$src"
+
+  alias_color() {
+    local target="$1" source="$2"
+    if [[ -z ${colors[$target]+_} && -n ${colors[$source]+_} ]]; then
+      colors[$target]="${colors[$source]}"
+      order+=("$target")
+    fi
+  }
+  alias_color lighter_background lighter_bg
+  alias_color dark_background dark_bg
+  alias_color darker_background darker_bg
+  alias_color light_foreground light_fg
+  alias_color bright_foreground bright_fg
+  alias_color dark_foreground dark_fg
+  alias_color lighter_bg lighter_background
+  alias_color dark_bg dark_background
+  alias_color darker_bg darker_background
+  alias_color light_fg light_foreground
+  alias_color bright_fg bright_foreground
+  alias_color dark_fg dark_foreground
+  alias_color selection_background selection
+  alias_color selection_foreground background
+  alias_color orange yellow
+  alias_color brown red
+
+  {
+    echo "# Bing image of the day - palette extracted by Aether."
+    echo "# Generated by bing-wallpaper on $(now_iso); edits are overwritten daily."
+    echo
+    for key in "${order[@]}"; do
+      printf '%s = "%s"\n' "$key" "${colors[$key]}"
+    done
+  } >"$dest"
+}
+
+build_theme() {
+  local image="$1" mode="$2" extract_mode="$3" work
+  command -v aether >/dev/null 2>&1 || return 2
+  work=$(mktemp -d)
+  local -a args=(--generate "$image" --no-apply --output "$work" --extract-mode "$extract_mode" --no-zed --no-vscode --no-neovim)
+  [[ $mode == light ]] && args+=(--light-mode)
+  if ! aether "${args[@]}" >"$work/aether.log" 2>&1 || [[ ! -f $work/colors.toml ]]; then
+    log "aether failed:"; cat "$work/aether.log" >&2
+    rm -rf "$work"
+    return 1
+  fi
+  mkdir -p "$THEME_DIR"
+  normalize_colors "$work/colors.toml" "$THEME_DIR/colors.toml"
+  if [[ -f $work/icons.theme ]]; then
+    tr -d '\n' <"$work/icons.theme" >"$THEME_DIR/icons.theme"
+  fi
+  rm -rf "$work"
+}
+
+apply_theme_and_background() {
+  local image="$1"
+  # Skip the theme's own background pick (it cycles to "the next one"), then
+  # set today's image explicitly.
+  OMARCHY_THEME_SKIP_BACKGROUND=1 omarchy-theme-set "$THEME_NAME" >/dev/null 2>&1 || return 1
+  omarchy-theme-bg-set "$image" >/dev/null 2>&1
+}
+
+# -------------------------------------------------------------- screensaver
+
+# Omarchy's screensaver is one plain-text file. omarchy-screensaver loops
+#
+#   ttfx -i ~/.config/omarchy/branding/screensaver.txt --random-effect ...
+#
+# re-reading the file on every cycle, so writing it *is* the whole integration:
+# nothing to restart, and a screensaver that happens to be running picks the new
+# picture up on its next effect.
+#
+# Three styles. "mono" is a plain luminance ramp. "color" gives every cell the
+# photograph's own colour as a truecolor escape, which ttfx keeps when
+# omarchy-screensaver passes --existing-color-handling (see
+# screensaver_color_supported; without it the escapes are stripped and the art
+# degrades to plain glyphs). "depth" builds on colour with a cheap sense of
+# space: the horizon is found, distant ground fades toward the sky's haze, near
+# cells get heavier glyphs, and five frames shifted by depth are rendered so
+# `bing-wallpaper parallax` can drift the camera between effects.
+#
+# We deliberately do not use omarchy-transcode-ascii. It is a 1-bit hard
+# threshold built for logos, and a photograph through it comes out a solid
+# block. A luminance ramp keeps the tonal range a picture needs.
+
+SCREENSAVER_RAMP=' .:-=+*#%@'
+FRAMES_DIR="$STATE_DIR/frames"
+# Parallax shifts in cells, one frame each; the middle one is the picture as
+# shot. Nearby ground moves the full shift, the horizon barely moves.
+PARALLAX_SHIFTS="-3 -1.5 0 1.5 3"
+# The order the loop shows the frames in: out to one side, back through the
+# middle, out to the other side, and back. Index 0 is the unshifted frame.
+PARALLAX_ORDER=(2 3 4 3 2 1 0 1)
+
+screensaver_sum() {
+  [[ -f $SCREENSAVER_FILE ]] || return 0
+  cksum <"$SCREENSAVER_FILE" | awk '{ print $1 }'
+}
+
+# Colour only shows if omarchy-screensaver tells ttfx to keep the colours it
+# finds in the file. Stock Omarchy 4.0 does not (yet); "auto" falls back to
+# mono until it does.
+screensaver_color_supported() {
+  local script
+  script=$(command -v omarchy-screensaver 2>/dev/null) || return 1
+  grep -q -- '--existing-color-handling' "$script" 2>/dev/null
+}
+
+effective_screensaver_style() {
+  case "${SETTINGS[screensaverStyle]}" in
+    auto) if screensaver_color_supported; then echo depth; else echo mono; fi ;;
+    *) echo "${SETTINGS[screensaverStyle]}" ;;
+  esac
+}
+
+# The caption is the picture's title and place, centred under the art, so a
+# lighthouse the size of four cells still gets named. Bing's copyright reads
+# "Place, Country (© Photographer/Agency)"; the credit stays in the panel.
+# Prints nothing, or a blank line followed by up to two lines.
+screensaver_caption() {
+  local cols="$1" title="$2" copyright="$3" place line
+  [[ ${SETTINGS[screensaverCaption]} == true ]] || return 0
+  place=$(sed -E 's/[[:space:]]*\(©[^)]*\)[[:space:]]*$//' <<<"$copyright")
+  [[ -n $title || -n $place ]] || return 0
+  echo
+  for line in "$title" "$place"; do
+    [[ -n $line ]] || continue
+    (( ${#line} <= cols )) || line="${line:0:cols-1}…"
+    printf '%*s%s\n' $(( (cols - ${#line}) / 2 )) '' "$line"
+  done
+}
+
+# Render the image as a grid of ASCII characters chosen by brightness.
+render_screensaver_art() {
+  local image="$1" cols="$2" rows="$3"
+  magick "$image" -auto-orient -colorspace Gray -normalize \
+    -resize "${cols}x${rows}!" -depth 8 -compress none pgm:- 2>/dev/null |
+    awk -v ramp="$SCREENSAVER_RAMP" '
+      NR == 1 { next }                       # P2 magic
+      /^#/ { next }
+      { for (i = 1; i <= NF; i++) token[++count] = $i }
+      END {
+        width = token[1]; height = token[2]; maxval = token[3]; offset = 4
+        levels = length(ramp)
+        if (width == "" || height == "" || maxval + 0 == 0) exit 1
+        for (y = 0; y < height; y++) {
+          line = ""
+          for (x = 0; x < width; x++) {
+            value = token[offset + y * width + x] / maxval
+            line = line substr(ramp, int(value * (levels - 1) + 0.5) + 1, 1)
+          }
+          sub(/[ ]+$/, "", line)
+          print line
+        }
+      }'
+}
+
+# Render the colour styles: one frame per shift into $FRAMES_DIR/N.txt. Every
+# cell carries the photograph's colour as a truecolor escape (emitted only when
+# it changes, spaces carry none) and a glyph chosen by brightness. The picture
+# is sampled at twice the column count so parallax can move in half cells.
+#
+# The "depth" style adds the spatial cues. The horizon is the first row where
+# sky-like pixels (blue-dominant and light, or near-white) stop dominating.
+# Above it is far; below it depth runs from far at the horizon to near at the
+# bottom. Ground fades toward the sky's haze with distance, except for cells
+# whose colour is nothing like the haze (a red tower stays red), and near cells
+# get heavier glyphs. A picture with no plausible horizon (a close-up, a
+# ceiling) is rendered flat, which is the right answer for it.
+render_screensaver_frames() {
+  local image="$1" cols="$2" rows="$3" style="$4" shifts="$5"
+  magick "$image" -auto-orient -clahe 20x20%+128+1.5 -modulate 100,120 \
+    -resize "$(( cols * 2 ))x${rows}!" -depth 8 -compress none ppm:- 2>/dev/null |
+    awk -v ramp="$SCREENSAVER_RAMP" -v style="$style" -v shifts="$shifts" -v outdir="$FRAMES_DIR" '
+      function lum(r, g, b) { return (0.2126 * r + 0.7152 * g + 0.0722 * b) / maxval }
+      function depth(y,    t) {
+        if (style != "depth") return 0
+        if (y < horizon) return 0.75 + 0.25 * y / (horizon > 0 ? horizon : 1)
+        t = (y - horizon) / (height - 1 - horizon > 0 ? height - 1 - horizon : 1)
+        return 1 - t ^ 0.6
+      }
+      function abs(v) { return v < 0 ? -v : v }
+      NR == 1 { next }                       # P3 magic
+      /^#/ { next }
+      { for (i = 1; i <= NF; i++) token[++count] = $i }
+      END {
+        width = token[1]; height = token[2]; maxval = token[3]; offset = 4
+        levels = length(ramp)
+        if (width == "" || height == "" || maxval + 0 == 0) exit 1
+        cols = int(width / 2)
+
+        # How much of each row looks like sky.
+        for (y = 0; y < height; y++) {
+          sky = 0
+          for (x = 0; x < width; x++) {
+            i = offset + (y * width + x) * 3
+            r = token[i]; g = token[i + 1]; b = token[i + 2]
+            l = lum(r, g, b)
+            mx = r; if (g > mx) mx = g; if (b > mx) mx = b
+            mn = r; if (g < mn) mn = g; if (b < mn) mn = b
+            s = mx == 0 ? 0 : (mx - mn) / mx
+            if ((b >= g && g >= r - 10 && l > 0.35) || (l > 0.8 && s < 0.25)) sky++
+          }
+          frac[y] = sky / width
+        }
+        frac[height] = 0; frac[height + 1] = 0
+
+        horizon = -1
+        if (style == "depth")
+          for (y = 0; y < height; y++)
+            if (frac[y] < 0.35 && frac[y + 1] < 0.5 && frac[y + 2] < 0.5) { horizon = y; break }
+        has_horizon = (horizon > 0.15 * height && horizon < 0.85 * height)
+        if (!has_horizon) horizon = int(height / 2)
+
+        # Haze: the mean colour of the sky just above the horizon.
+        hr = hg = hb = n = 0
+        for (y = (horizon > 3 ? horizon - 3 : 0); y < (horizon > 0 ? horizon : 1); y++)
+          for (x = 0; x < width; x++) {
+            i = offset + (y * width + x) * 3
+            hr += token[i]; hg += token[i + 1]; hb += token[i + 2]; n++
+          }
+        hr /= n; hg /= n; hb /= n
+
+        nshifts = split(shifts, shift, " ")
+        for (f = 1; f <= nshifts; f++) {
+          file = outdir "/" (f - 1) ".txt"
+          for (y = 0; y < height; y++) {
+            d = depth(y)
+            dx = shift[f] * 2 * (1 - d)
+            dx = int(dx + (dx >= 0 ? 0.5 : -0.5))
+            line = ""; last = ""
+            for (x = 0; x < cols; x++) {
+              sx = 2 * x + dx
+              if (sx < 0) sx = 0
+              if (sx >= width) sx = width - 1
+              i = offset + (y * width + sx) * 3
+              r = token[i]; g = token[i + 1]; b = token[i + 2]
+              if (has_horizon && y >= horizon) {
+                dist = (abs(r - hr) + abs(g - hg) + abs(b - hb)) / (3 * maxval)
+                k = d - 0.4; if (k < 0) k = 0
+                k = 0.45 * k / 0.6 * (1 - (dist * 2.5 > 1 ? 1 : dist * 2.5))
+                r = r * (1 - k) + hr * k; g = g * (1 - k) + hg * k; b = b * (1 - k) + hb * k
+              }
+              l = 0.2 + 0.8 * lum(r, g, b)
+              w = style == "depth" ? 0.75 + 0.25 * (1 - d) : 1
+              idx = int(l * w * (levels - 1) + 0.5)
+              if (idx > levels - 1) idx = levels - 1
+              ch = substr(ramp, idx + 1, 1)
+              if (ch == " ") { line = line " "; continue }
+              col = sprintf("%d;%d;%d", r, g, b)
+              if (col != last) { line = line "\033[38;2;" col "m"; last = col }
+              line = line ch
+            }
+            print line "\033[0m" > file
+          }
+          close(file)
+        }
+      }'
+}
+
+# Copy frame N into place. The file is replaced atomically so a ttfx starting
+# mid-write never reads half a picture.
+screensaver_put_frame() {
+  local frame="$FRAMES_DIR/$1.txt" tmp
+  [[ -s $frame ]] || return 1
+  tmp=$(mktemp "$SCREENSAVER_FILE.XXXXXX") || return 1
+  cp "$frame" "$tmp" && "$MV" "$tmp" "$SCREENSAVER_FILE" || { rm -f "$tmp"; return 1; }
+}
+
+# True when the file on disk is one of ours (any frame), so we know it is safe
+# to overwrite or restore. A file the user has edited since is theirs.
+screensaver_file_is_ours() {
+  local current
+  current=$(screensaver_sum)
+  [[ -n $current ]] || return 1
+  [[ " $(state_get screensaverSums) " == *" $current "* ]] ||
+    [[ $current == "$(state_get screensaverSum)" ]]
+}
+
+# Terminal cells are roughly 2.3x taller than they are wide, so a 16:9 picture
+# needs about four times as many columns as rows to look square on screen. The
+# 120x29 default is close to that ratio and still fits the smallest canvas we
+# can reasonably expect -- a 1080p display at the screensaver's font size is
+# about 133x32 cells. There is no per-monitor sizing here on purpose: ttfx
+# centres the art without scaling it, and Omarchy's own logo is a fixed 79x28
+# on every display, so one fixed size is native behaviour rather than a
+# compromise. The caption, when on, comes out of the same budget so the whole
+# thing still fits.
+#
+# Returns 2 when ImageMagick is missing, 1 when the render fails.
+screensaver_write() {
+  local image="$1" style="$2" title="$3" copyright="$4"
+  local size="${SETTINGS[screensaverSize]}" cols rows caption caption_rows=0 art_rows
+  local shifts="0" frames=0 frame sums=""
+  command -v magick >/dev/null 2>&1 || return 2
+  cols="${size%x*}"
+  rows="${size#*x}"
+
+  caption=$(screensaver_caption "$cols" "$title" "$copyright")
+  [[ -z $caption ]] || caption_rows=$(printf '%s\n' "$caption" | wc -l)
+  art_rows=$(( rows - caption_rows ))
+  (( art_rows >= 5 )) || { art_rows=$rows; caption=""; }
+
+  [[ $style == depth && ${SETTINGS[screensaverParallax]} == true ]] && shifts="$PARALLAX_SHIFTS"
+
+  mkdir -p "$BRANDING_DIR" "$STATE_DIR"
+  rm -rf "$FRAMES_DIR"
+  mkdir -p "$FRAMES_DIR" || return 1
+  if [[ $style == mono ]]; then
+    render_screensaver_art "$image" "$cols" "$art_rows" >"$FRAMES_DIR/0.txt" || return 1
+  else
+    render_screensaver_frames "$image" "$cols" "$art_rows" "$style" "$shifts" || return 1
+  fi
+  for frame in "$FRAMES_DIR"/[0-9].txt; do
+    [[ -s $frame ]] || return 1
+    [[ -z $caption ]] || printf '%s\n' "$caption" >>"$frame"
+    (( frames++ ))
+  done
+  (( frames > 0 )) || return 1
+
+  # branding/screensaver.txt belongs to the user -- `omarchy branding
+  # screensaver` writes it too. Keep one copy of whatever was there before we
+  # first touched it so the toggle is reversible.
+  if [[ ! -f $SCREENSAVER_BACKUP && -f $SCREENSAVER_FILE ]]; then
+    cp "$SCREENSAVER_FILE" "$SCREENSAVER_BACKUP"
+  fi
+
+  for frame in "$FRAMES_DIR"/[0-9].txt; do
+    sums+="$(cksum <"$frame" | awk '{ print $1 }') "
+  done
+  screensaver_put_frame "$(( (frames - 1) / 2 ))" || return 1
+  echo 0 >"$FRAMES_DIR/position"
+  write_state screensaverSum="$(screensaver_sum)" screensaverSums="${sums% }" screensaverFrames="$frames"
+}
+
+# Put the user's own art back -- but only if the file on disk is still one we
+# wrote. If they have edited it since, it is theirs and we leave it alone.
+screensaver_restore() {
+  [[ -f $SCREENSAVER_BACKUP ]] || return 0
+  screensaver_file_is_ours || return 0
+  cp "$SCREENSAVER_BACKUP" "$SCREENSAVER_FILE" || return 1
+  rm -f "$SCREENSAVER_BACKUP"
+  rm -rf "$FRAMES_DIR"
+  write_state screensaverSum="" screensaverSums="" screensaverFrames=0
+}
+
+# The settings that change what the art looks like, as one string, so a change
+# to any of them re-renders.
+screensaver_signature() {
+  echo "${SETTINGS[screensaverSize]} ${SETTINGS[screensaverStyle]} ${SETTINGS[screensaverCaption]} ${SETTINGS[screensaverParallax]}"
+}
+
+# Bring the screensaver in line with the current settings, using the picture we
+# already have. Called after a fetch and after a setting changes. Title and
+# copyright default to the state's, which is right except in the moment a new
+# picture lands, when the caller has fresher ones.
+sync_screensaver() {
+  local image="$1" title="${2-$(state_get title)}" copyright="${3-$(state_get copyright)}" style status color=false
+
+  if [[ ${SETTINGS[screensaver]} != true ]]; then
+    screensaver_restore
+    write_state screensaverOn=false screensaver=off
+    return 0
+  fi
+
+  if [[ ! -f $image ]]; then
+    write_state screensaverOn=true screensaver=pending
+    return 0
+  fi
+
+  style=$(effective_screensaver_style)
+  screensaver_color_supported && color=true
+  screensaver_write "$image" "$style" "$title" "$copyright"
+  case $? in
+    0) status="applied" ;;
+    2) status="magick-missing"
+       log "imagemagick is not installed; run 'bing-wallpaper install-deps'" ;;
+    *) status="failed" ;;
+  esac
+  write_state screensaverOn=true screensaver="$status" \
+    screensaverSignature="$(screensaver_signature)" screensaverStyle="$style" \
+    screensaverStyleSetting="${SETTINGS[screensaverStyle]}" screensaverColor="$color" \
+    screensaverCaption="${SETTINGS[screensaverCaption]}" screensaverParallax="${SETTINGS[screensaverParallax]}"
+}
+
+# --------------------------------------------------------------- lock screen
+
+# Both Omarchy lock screens -- the stock one and Lock Screen Explorer -- already
+# draw ~/.local/state/omarchy/current/background, which a fetch points at
+# today's picture, so the lock screen always has the right image. What it lacks
+# is a way to *show* it: the stock lock blurs it away, and so do most Explorer
+# designs. The lockScreen setting adds a design of our own to Explorer (see
+# lock/Bing.qml): the picture sharp, a clock, and its title and place.
+#
+# Explorer does the locking, the PAM conversation and every other part that has
+# to be right; we only drop one file in its designs folder and ask it, over its
+# IPC, to use it. Nothing here touches authentication.
+
+lock_ipc() {
+  local shell_bin
+  shell_bin=$(resolve_tool omarchy-shell) || return 1
+  timeout 5 "$shell_bin" lock "$@" 2>/dev/null
+}
+
+# Explorer answers `lock design`; the stock lock has no such method.
+lock_explorer_running() {
+  [[ -n $(lock_ipc design) ]]
+}
+
+lock_design_sum() {
+  [[ -f $1 ]] && cksum <"$1" | "$AWK" '{ print $1 }'
+}
+
+# The installed copy is ours to replace or remove only while it is byte for
+# byte what we last wrote. Edited, it belongs to the user.
+lock_design_is_ours() {
+  local current
+  current=$(lock_design_sum "$LOCK_DESIGN_FILE")
+  [[ -n $current && $current == "$(state_get lockDesignSum)" ]]
+}
+
+# Put the shipped design in place, or refresh it after an upgrade.
+lock_design_install() {
+  local tmp
+  [[ -f $LOCK_DESIGN_SRC ]] || return 1
+  if [[ -f $LOCK_DESIGN_FILE ]]; then
+    lock_design_is_ours || return 0
+    cmp -s "$LOCK_DESIGN_SRC" "$LOCK_DESIGN_FILE" && return 0
+  fi
+  mkdir -p "$LOCK_DESIGNS_DIR" || return 1
+  tmp=$(mktemp "$LOCK_DESIGNS_DIR/.Bing.XXXXXX") || return 1
+  cp "$LOCK_DESIGN_SRC" "$tmp" && chmod 644 "$tmp" && "$MV" "$tmp" "$LOCK_DESIGN_FILE" || { rm -f "$tmp"; return 1; }
+  write_state lockDesignSum="$(lock_design_sum "$LOCK_DESIGN_FILE")"
+}
+
+# Explorer only learns of a new file when it rescans lock-designs/, which it
+# does when it locks or opens a preview. `previewDesign` rescans first and,
+# while the id is still unknown, returns without showing anything -- so one
+# call is a rescan with no side effect. Then wait for the scan to land.
+lock_select_design() {
+  local id="$1" out="" previewed=0
+  [[ $(lock_ipc setDesign "$id") == ok ]] && return 0
+  [[ $(lock_ipc previewDesign "$id") == ok ]] && previewed=1
+  for _ in 1 2 3 4 5 6; do
+    sleep 0.5
+    out=$(lock_ipc setDesign "$id")
+    [[ $out == ok ]] && break
+  done
+  # Had the scan already finished, previewDesign opened a preview: close it.
+  (( previewed )) && lock_ipc hidePreview >/dev/null
+  [[ $out == ok ]]
+}
+
+# Bring the lock screen in line with the setting. Called when it changes and
+# after a fetch. Selecting the design only happens when the setting is turned
+# on: picking another design in Explorer afterwards is the user's call, and a
+# morning fetch must not undo it.
+sync_lock_screen() {
+  local select="${1:-false}" current previous
+
+  if [[ ${SETTINGS[lockScreen]} != true ]]; then
+    [[ $(state_get lockScreen) =~ ^(off)?$ ]] && return 0
+    # Hand the lock screen back to the design it had before, then take ours
+    # away. Explorer falls back to its default if it is still selected.
+    if lock_explorer_running && [[ $(lock_ipc design) == "$LOCK_DESIGN_ID" ]]; then
+      previous=$(state_get lockPrevDesign)
+      [[ -n $previous && $previous != "$LOCK_DESIGN_ID" ]] && lock_ipc setDesign "$previous" >/dev/null
+    fi
+    lock_design_is_ours && rm -f "$LOCK_DESIGN_FILE"
+    write_state lockScreen=off lockPrevDesign="" lockDesignSum=""
+    return 0
+  fi
+
+  # The stock lock still shows today's picture, blurred; the panel says so.
+  if ! lock_explorer_running; then
+    write_state lockScreen=no-explorer
+    return 0
+  fi
+
+  lock_design_install || { write_state lockScreen=failed; return 1; }
+  if [[ $select == true ]]; then
+    current=$(lock_ipc design)
+    if [[ $current != "$LOCK_DESIGN_ID" ]]; then
+      write_state lockPrevDesign="$current"
+      lock_select_design "$LOCK_DESIGN_ID" || { write_state lockScreen=failed; return 1; }
+    fi
+  fi
+  write_state lockScreen=applied
+}
+
+# ----------------------------------------------------------------- parallax
+
+# `bing-wallpaper parallax` is a small daemon the service keeps running. It
+# idles until the screensaver opens, then every time omarchy-screensaver starts
+# a new ttfx effect it swaps the next parallax frame into screensaver.txt, so
+# each effect dissolves into a picture whose camera has drifted a little. ttfx
+# reads the file once at start-up, which is why the swap happens right after an
+# effect begins: it is the *next* effect that shows the new frame.
+
+# omarchy-launch-screensaver starts the terminal with --class=org.omarchy.screensaver
+# (--app-id= for foot); matching that argument, rather than the bare name, keeps
+# an editor with a file of that name open from counting as a screensaver.
+screensaver_running() {
+  pgrep -f -- '(--class|--app-id)=org\.omarchy\.screensaver' >/dev/null 2>&1
+}
+
+# Block until a screensaver window exists. Hyprland's event socket gives us that
+# for free; without it (or if the stream drops) fall back to a slow poll.
+wait_for_screensaver() {
+  screensaver_running && return 0
+  local sock="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hypr/${HYPRLAND_INSTANCE_SIGNATURE:-}/.socket2.sock" line fd pid
+  if [[ -n ${HYPRLAND_INSTANCE_SIGNATURE:-} && -S $sock ]] && command -v socat >/dev/null 2>&1; then
+    exec {fd}< <(socat -U - "UNIX-CONNECT:$sock" 2>/dev/null)
+    pid=$!
+    bw_track_child "$pid"
+    while IFS= read -r -u "$fd" line; do
+      if [[ $line == openwindow\>\>*,org.omarchy.screensaver,* ]]; then
+        exec {fd}<&-
+        kill "$pid" 2>/dev/null
+        return 0
+      fi
+    done
+    exec {fd}<&-
+    kill "$pid" 2>/dev/null
+  fi
+  until screensaver_running; do sleep 5; done
+}
+
+# Show the next frame in PARALLAX_ORDER. Does nothing when there is only one
+# frame, or when the file on disk is no longer ours.
+parallax_advance() {
+  local frames position
+  frames=$(state_get screensaverFrames)
+  [[ $frames =~ ^[0-9]+$ ]] && (( frames > 1 )) || return 1
+  screensaver_file_is_ours || return 1
+  position=$(cat "$FRAMES_DIR/position" 2>/dev/null)
+  [[ $position =~ ^[0-9]+$ ]] || position=0
+  position=$(( (position + 1) % ${#PARALLAX_ORDER[@]} ))
+  screensaver_put_frame "${PARALLAX_ORDER[position]}" && echo "$position" >"$FRAMES_DIR/position"
+}
+
+# Back to the unshifted frame, so the next time the screensaver starts it
+# starts centred.
+parallax_reset() {
+  [[ $(cat "$FRAMES_DIR/position" 2>/dev/null) == 0 ]] && return 0
+  screensaver_file_is_ours || return 0
+  screensaver_put_frame "${PARALLAX_ORDER[0]}" && echo 0 >"$FRAMES_DIR/position"
+}
+
+cmd_parallax() {
+  case "${1:-}" in
+    --step) parallax_advance; return ;;
+    --reset) parallax_reset; return ;;
+    "") ;;
+    *) fail "usage: bing-wallpaper parallax [--step | --reset]" ;;
+  esac
+
+  exec 8>"${LOCK_FILE%.lock}-parallax.lock"
+  flock -n 8 || { log "another parallax loop is running"; return 0; }
+
+  local pids seen last_advance
+  while true; do
+    wait_for_screensaver
+    load_settings
+    seen="" last_advance=0
+    while screensaver_running; do
+      if [[ ${SETTINGS[screensaver]} == true && ${SETTINGS[screensaverParallax]} == true ]]; then
+        pids=$(pgrep -x ttfx 2>/dev/null | sort | tr '\n' ' ')
+        # A new ttfx means a new effect has begun and has already read the
+        # file; give the next one the next frame. Several monitors start their
+        # effects within a moment of each other, hence the two-second hold.
+        if [[ -n $pids && $pids != "$seen" ]]; then
+          seen="$pids"
+          if (( SECONDS - last_advance >= 2 )); then
+            parallax_advance || true
+            last_advance=$SECONDS
+          fi
+        fi
+      fi
+      sleep 0.5
+    done
+    parallax_reset || true
+  done
+}
+
+notify() {
+  [[ ${SETTINGS[notify]} == true ]] || return 0
+  command -v omarchy-notification-send >/dev/null 2>&1 || return 0
+  omarchy-notification-send "$@" >/dev/null 2>&1 || true
+}
+
+# ------------------------------------------------------------------- fetch
+
+cmd_fetch() {
+  local force=0 day=0 want_date=""
+  while (( $# > 0 )); do
+    case "$1" in
+      --force | -f) force=1 ;;
+      --day)
+        day="$2"; shift
+        [[ $day =~ ^[0-7]$ ]] || fail "--day takes a number from 0 (today) to 7"
+        # An explicit day is always a change the user wants applied now.
+        force=1
+        ;;
+      --date)
+        want_date="$2"; shift
+        [[ $want_date =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || fail "--date takes YYYY-MM-DD"
+        force=1
+        ;;
+      --market) SETTINGS[market]="$2"; shift ;;
+      --mode) SETTINGS[mode]="$2"; shift ;;
+      -h | --help) sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; return 0 ;;
+      *) fail "unknown fetch option: $1" ;;
+    esac
+    shift
+  done
+
+  need curl jq file
+  exec 9>"$LOCK_FILE"
+  flock -n 9 || { log "another fetch is running"; return 0; }
+
+  local market="${SETTINGS[market]}" mode now next_check next_flip
+  mode=$(effective_mode)
+  now=$(now_epoch)
+
+  # The screensaver is rendered from the picture we already have, so the
+  # toggle can be honoured right now -- it must not wait on the fetch schedule.
+  # "auto" also re-renders when Omarchy gains (or loses) colour support, which
+  # is a change on the system rather than in the settings.
+  if [[ $(state_get screensaverOn) != "${SETTINGS[screensaver]}" ]] ||
+     [[ ${SETTINGS[screensaver]} == true &&
+        ( $(state_get screensaverSignature) != "$(screensaver_signature)" ||
+          $(state_get screensaverStyle) != "$(effective_screensaver_style)" ) ]]; then
+    sync_screensaver "$(state_get image)"
+  fi
+
+  # Same for the lock screen toggle. Until it has been applied this retries on
+  # every tick, so installing Lock Screen Explorer later is picked up too.
+  local lock_state
+  lock_state=$(state_get lockScreen)
+  if [[ ${SETTINGS[lockScreen]} == true && $lock_state != applied ]] ||
+     [[ ${SETTINGS[lockScreen]} != true && -n $lock_state && $lock_state != off ]]; then
+    sync_lock_screen true
+  fi
+
+  # Cheap path: nothing can have changed yet, the palette mode is the same,
+  # and the archive matches. The service ticks often so this has to be
+  # nearly free.
+  next_check=$(state_get nextCheck)
+  if (( ! force )) &&
+     [[ $(state_get market) == "$market" ]] &&
+     [[ $(state_get mode) == "$mode" ]] &&
+     [[ $(state_get extractMode) == "${SETTINGS[extractMode]}" ]] &&
+     [[ $(state_get applyTheme) == "${SETTINGS[applyTheme]}" ]] &&
+     [[ -n $next_check && $now -lt $next_check ]] &&
+     [[ -f $(state_get image) ]] &&
+     [[ $(archive_get status) == ready ]] &&
+     [[ $(archive_get market) == "$market" ]] &&
+     [[ $(archive_get mode) == "$mode" ]] &&
+     [[ $(archive_get extractMode) == "${SETTINGS[extractMode]}" ]] &&
+     [[ $(archive_get wanted) == "$(archive_count)" ]]; then
+    return 0
+  fi
+
+  write_state status=fetching updatedAt="$(now_iso)"
+
+  local images
+  if ! images=$(fetch_metadata "$market") || [[ -z $images || $("$JQ" 'length' <<<"$images") -eq 0 ]]; then
+    write_state status=error error="Could not reach Bing for market $market" nextCheck=$(( now + 600 ))
+    log "could not fetch Bing metadata for $market"
+    return 1
+  fi
+
+  # An explicit date is looked up in the fresh list, so a picture picked from
+  # the panel stays the right picture even if a new one landed in between.
+  if [[ -n $want_date ]]; then
+    local compact="${want_date//-/}"
+    day=$("$JQ" -r --arg d "$compact" 'to_entries[] | select(.value.startdate == $d) | .key' <<<"$images" | "$HEAD" -1)
+    # The picture on screen is still fine, so this is a CLI error, not a state.
+    [[ -n $day ]] || { write_state status=ok; fail "Bing has no picture for $want_date in $market"; }
+  fi
+
+  local meta
+  meta=$("$JQ" -c ".[$day] // empty" <<<"$images")
+  if [[ -z $meta ]]; then
+    write_state status=ok
+    fail "Bing has no picture from $day days ago for $market"
+  fi
+
+  parse_image_meta "$meta" "$market"
+  local fullstart="$META_FULLSTART" urlbase="$META_URLBASE" title="$META_TITLE"
+  local copyright="$META_COPYRIGHT" link="$META_LINK" image_id="$META_ID"
+  local date_fmt="$META_DATE" image="$META_IMAGE"
+  mkdir -p "$BACKGROUNDS_DIR"
+
+  local resolution="cached"
+  if [[ ! -s $image ]]; then
+    if ! resolution=$(download_image "$urlbase" "$image"); then
+      write_state status=error error="Image download failed" nextCheck=$(( now + 600 ))
+      log "could not download $urlbase"
+      return 1
+    fi
+  fi
+
+  # Bing publishes one image a day at the same UTC time, so the changeover
+  # after an older picture is that picture's own changeover plus its age. An
+  # explicit --day therefore holds until tomorrow's image, then yields to it.
+  local next_image
+  next_image=$(next_image_epoch "$fullstart") || next_image=$(( now + 3600 ))
+  next_image=$(( next_image + day * 86400 ))
+  # Poll a little after the scheduled changeover; Bing is not always punctual.
+  next_check=$(( next_image + 300 ))
+  (( next_check > now )) || next_check=$(( now + 1800 ))
+  next_flip=$(next_mode_flip)
+  if [[ -n $next_flip ]] && (( next_flip < next_check )); then
+    next_check=$next_flip
+  fi
+
+  local changed=0 theme_status="skipped"
+  if [[ $(state_get imageId) != "$image_id" || $(state_get mode) != "$mode" ||
+        $(state_get extractMode) != "${SETTINGS[extractMode]}" ||
+        $(state_get applyTheme) != "${SETTINGS[applyTheme]}" || $force == 1 ]]; then
+    changed=1
+  fi
+
+  if (( changed )); then
+    if [[ ${SETTINGS[applyTheme]} == true ]]; then
+      case "$(build_theme "$image" "$mode" "${SETTINGS[extractMode]}"; echo $?)" in
+        0) theme_status="applied" ;;
+        2) theme_status="aether-missing"; log "aether is not installed; setting wallpaper only" ;;
+        *) theme_status="failed" ;;
+      esac
+    fi
+
+    if [[ $theme_status == applied ]]; then
+      apply_theme_and_background "$image" || theme_status="apply-failed"
+    else
+      omarchy-theme-bg-set "$image" >/dev/null 2>&1 || true
+    fi
+  fi
+
+  write_state \
+    status=ok error="" \
+    imageId="$image_id" image="$image" date="$date_fmt" market="$market" day="$day" \
+    title="$title" copyright="$copyright" link="$link" \
+    mode="$mode" modeSetting="${SETTINGS[mode]}" extractMode="${SETTINGS[extractMode]}" \
+    applyTheme="${SETTINGS[applyTheme]}" theme="$theme_status" resolution="$resolution" \
+    nextCheck="$next_check" nextImage="$next_image" updatedAt="$(now_iso)"
+
+  # A new picture needs new art. Setting changes were handled above.
+  if (( changed )) && [[ ${SETTINGS[screensaver]} == true ]]; then
+    sync_screensaver "$image" "$title" "$copyright"
+  fi
+
+  # Keeps the installed lock design current after an upgrade. The picture and
+  # caption reach the lock screen on their own (see sync_lock_screen).
+  if (( changed )) && [[ ${SETTINGS[lockScreen]} == true ]]; then
+    sync_lock_screen
+  fi
+
+  if (( changed )) && [[ $(state_get lastNotifiedId) != "$image_id" ]]; then
+    notify "Bing: $title" -t 4000
+    write_state lastNotifiedId="$image_id"
+  fi
+
+  log "bing-wallpaper: $date_fmt [$market] \"$title\" ($mode, theme: $theme_status)"
+
+  # Today's picture is on screen; now fill in the week behind it. This is the
+  # slow part on a first run, so it comes after the desktop is already themed.
+  sync_archive "$images" "$market" "$mode"
+  prune_backgrounds
+}
+
+# Switch to an archived picture. Accepts a date, an archive id, or N days ago.
+cmd_apply() {
+  local key="$1" when
+  [[ -n $key ]] || fail "usage: bing-wallpaper apply <YYYY-MM-DD | image id | days ago>"
+  when=$(archive_lookup_date "$key")
+  [[ -n $when ]] || fail "no archived picture matches '$key' (see 'bing-wallpaper archive')"
+  cmd_fetch --date "$when"
+}
+
+cmd_open() {
+  local key="${1:-}" link when
+  if [[ -n $key ]]; then
+    when=$(archive_lookup_date "$key")
+    [[ -n $when ]] || fail "no archived picture matches '$key'"
+    link=$(read_archive | "$JQ" -r --arg d "$when" '.entries[]? | select(.date == $d) | .link // empty' | "$HEAD" -1)
+  else
+    link=$(state_get link)
+  fi
+  link=$(sanitize_link "$link")
+  [[ -n $link ]] || fail "no story link yet; run fetch first"
+  detach_to "$link" omarchy-launch-browser xdg-open
+}
+
+# Hand one argument to the first handler that is actually installed under a
+# trusted directory, detached into its own session. Resolving the handler (and
+# setsid) rather than calling it by name keeps "open the story" from being
+# redirected by whatever PATH happens to be around.
+detach_to() {
+  local target="$1" name launcher="" setsid_bin
+  shift
+  for name in "$@"; do
+    launcher=$(resolve_tool "$name") && break
+    launcher=""
+  done
+  [[ -n $launcher ]] || fail "no handler available to open '$target'"
+  if setsid_bin=$(resolve_tool setsid); then
+    "$setsid_bin" "$launcher" "$target" >/dev/null 2>&1 &
+  else
+    "$launcher" "$target" >/dev/null 2>&1 &
+  fi
+}
+
+# The Wallpapers button in the panel. Only ever opens the plugin's own
+# backgrounds folder, only when it exists, and only through the file handler --
+# a directory has no business going to a browser.
+cmd_backgrounds() {
+  [[ -d $BACKGROUNDS_DIR ]] || fail "no backgrounds yet; run fetch first"
+  detach_to "$BACKGROUNDS_DIR" xdg-open
+}
+
+# The screensaver needs ImageMagick, which is not guaranteed on a stock
+# Omarchy box. Installing it needs a sudo password, so this has to be run from a
+# terminal -- the panel launches one rather than trying to do it in the service.
+cmd_install_deps() {
+  if command -v magick >/dev/null 2>&1; then
+    echo "ImageMagick is already installed."
+    return 0
+  fi
+  command -v omarchy-pkg-add >/dev/null 2>&1 ||
+    fail "omarchy-pkg-add not found; install the 'imagemagick' package manually"
+  echo "Installing ImageMagick (needed to render the screensaver)..."
+  omarchy-pkg-add imagemagick || fail "could not install imagemagick"
+  echo "Done. Turn the screensaver setting on again to render today's picture."
+}
+
+cmd_next() {
+  local next
+  next=$(state_get nextCheck)
+  [[ -n $next ]] || { echo "unknown (never fetched)"; return; }
+  date -d "@$next"
+}
+
+main() {
+  local cmd="${1:-fetch}"
+  shift || true
+  # Cap what the service can be made to buffer. Only the subcommands it drives:
+  # a caller asking for status or archive JSON gets all of it.
+  case "$cmd" in fetch | apply | parallax) bound_output ;; esac
+  load_settings
+  case "$cmd" in
+    fetch) cmd_fetch "$@" ;;
+    apply) cmd_apply "$@" ;;
+    archive) read_archive | "$JQ" . ;;
+    status) read_state | "$JQ" . ;;
+    settings) print_settings ;;
+    set)
+      [[ $# -eq 2 ]] || fail "usage: bing-wallpaper set <key> <value>"
+      set_setting "$1" "$2"
+      # The screensaver toggle should take effect now, not at tomorrow's fetch.
+      if [[ $1 == screensaver* ]]; then
+        load_settings
+        sync_screensaver "$(state_get image)"
+      fi
+      if [[ $1 == lockScreen ]]; then
+        load_settings
+        sync_lock_screen true
+      fi
+      ;;
+    open) cmd_open "$@" ;;
+    backgrounds) cmd_backgrounds ;;
+    next) cmd_next ;;
+    install-deps) cmd_install_deps ;;
+    lock-screen) sync_lock_screen true ;;
+    parallax) cmd_parallax "$@" ;;
+    -h | --help | help) sed -n '2,26p'"$0" | sed 's/^# \{0,1\}//' ;;
+    *) fail "unknown command '$cmd' (fetch|apply|archive|status|settings|set|open|backgrounds|next|install-deps|lock-screen|parallax)" ;;
+  esac
+}
+
+main "$@"

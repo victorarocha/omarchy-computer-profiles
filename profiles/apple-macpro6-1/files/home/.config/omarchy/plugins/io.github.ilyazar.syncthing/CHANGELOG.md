@@ -1,0 +1,152 @@
+# Changelog
+
+Notable changes to Syncshell for Omarchy are documented here.
+
+## 0.2.2 - 2026-10-06
+
+- render unaccepted remote-device names as plain text in Illogical Impulse and
+  Waybar dismissal confirmations
+
+## 0.2.1 - 2026-10-05
+
+- render pending remote-device names as plain text in the Illogical Impulse and
+  Waybar adapters
+
+## 0.2.0 - 2026-10-05
+
+- bundle a Linux aarch64 core for Apple Silicon Macs running Omarchy
+- update the bundled Web UI to 0.1.4 with refreshed management flows, improved
+  contrast, keyboard focus, and native Omarchy palette handling
+- use the bundled Go core for Waybar configuration during installation and
+  removal, eliminating the Python dependency
+- keep one or two folders visible as cards and use a stable compact selector for
+  larger collections, including paused and unshared folders
+- add direct fuzzy folder search with status dots, result counts, filtering, and
+  sorting without changing the selected folder as the view changes
+- explain folder and device statuses through delayed full-row dropdown tooltips
+- navigate panel actions and nested folder view controls with arrow or Vim keys,
+  while Escape or `q` dismisses one layer at a time
+- open folder and device setup, acceptance, sharing, and management forms in
+  anchored side cards so the main panel stays in place
+- keep background status refreshes from showing feedback reserved for manual
+  refreshes
+- refresh the preview and demo videos for file activity, folder management,
+  themes and icons, and device management
+- restore bar hover tooltips with Omarchy's current plugin API; thanks to
+  [@sherajdev](https://github.com/sherajdev) for reporting, diagnosing, and
+  verifying the fix in
+  [#103](https://github.com/omarchy-QOL/syncshell/issues/103)
+
+## 0.1.9 - 2026-09-21
+
+- add remote-device discovery and setup to the Omarchy panel, including nearby
+  and pending devices
+- add folder-sharing controls for new and existing folders and safe local
+  removal of configured devices and folder shares
+- configure incoming folder offers and confirm creation of missing local
+  directories, including paths starting with `~`
+- confirm folder link changes and device removal before applying them
+- allow clean plugin removal when Syncthing is stopped, disabled, or absent
+- report only remote devices in connection totals and use Syncthing's Device ID
+  terminology
+- refine panel dropdowns, status indicators, action placement, and installation
+  feedback
+- keep folder controls inert during targeted and all-folder rescans and handle
+  paused folders and long-running scans consistently
+
+## 0.1.8 - 2026-09-13
+
+- detect SyncThingy Flatpak installations, adapted to the Go core from
+  [@whelanh](https://github.com/whelanh)'s contribution in
+  [#48](https://github.com/omarchy-QOL/syncshell/pull/48); preserve native
+  discovery precedence, validate config/TLS, and guard native service controls
+- fix themed bar icon contrast and rendering at the host size, contributed by
+  [@baranskyi](https://github.com/baranskyi) in
+  [#47](https://github.com/omarchy-QOL/syncshell/pull/47)
+- stop zero-work `sync-preparing` transitions from flashing as active syncing,
+  contributed by [@dawez](https://github.com/dawez) in
+  [#101](https://github.com/omarchy-QOL/syncshell/pull/101)
+
+- connect local conflict folder opening and guarded renaming to the desktop
+  user, without changing permissions or replacing an existing destination
+- label conflict resolution as beta and use a themed Syncshell header
+
+- add a Preact Web UI with grouped folders/devices, notifications and API-based
+  conflict discovery and rescans
+- refine the 400-pixel panel action area, keep current and planned interface
+  entries visible, standardize tooltips and acknowledge status refreshes
+- migrate older plugin settings with a preview and an exact backup while
+  preserving valid preferences, comments, permissions and managed symlinks
+- show folder error details and theme the selected Web UI address
+- stop the rescan wait with an error when Syncthing becomes unavailable
+- report rejected service actions immediately and keep their errors visible
+- enforce the core crash-retry limit without blocking initial installation
+  recovery, and disable unavailable actions after the core stops
+- check existing tilde folder paths for overlap using Syncthing's own home
+  directory; require absolute paths when their location cannot be determined
+- resume file activity when Syncthing's event sequence resets on reconnect while
+  preserving unread events from a surviving daemon
+- match Syncthing home and config directory options consistently so service
+  controls cannot target another instance through short option spellings
+- replace the QML Syncthing engine with one parent-bound native Go core
+- fix issue 45 by treating healthy external Syncthing instances as online
+  without exposing controls for an unrelated inactive user service
+- bundle one reproducible static Linux x86_64 executable with a public JSONL
+  protocol and keep the panel's credentials, REST, events and lifecycle in Go
+- make accepted single and global rescans visible immediately with rotating,
+  inert controls and explicit optimistic folder state
+- keep long-running accepted rescans from surfacing a false request timeout
+- wait until targeted folders leave scanning before reporting rescan completion,
+  so notices and the all-folders control follow the last folder rather than the
+  HTTP accept
+- show the bar sync overlay as soon as a plugin rescan is busy, not only after
+  snapshot scanning arrives
+- distinguish plain `SCANNING` from concurrent `SCAN+SYNC` during an accepted
+  rescan
+- require a shell restart after updating to load the current plugin while
+  preserving settings and bar placement
+
+## 0.1.7 - 2026-08-31
+
+- reconcile configured and systemd user-service startup states without changing
+  the independent runtime start and stop controls (thanks @renews for reporting)
+- add a configurable interval for detecting external systemd state changes
+- add per-folder and all-folder rescans, a clearer host ID copy control, and
+  remembered local host identity while Syncthing is stopped
+
+## 0.1.6 - 2026-08-22
+
+- Make live and indexed file activity accurate for additions, deletions,
+  concurrent changes, and active folders.
+- Refine folder management with pending offers, copyable Syncthing IDs, and
+  explicit link, unlink, and forget actions.
+- Add versioned icon preferences, live Omarchy Web UI theming, and clean plugin
+  removal that can preserve settings.
+- Refresh the preview and add four focused demo videos.
+
+## 0.1.5 - 2026-08-20
+
+- Add an optional theme-colored bar icon while keeping the Syncthing artwork as
+  the default (@davidszp, @ilyaZar).
+
+## 0.1.4 - 2026-08-16
+
+- Support Syncthing installations with TLS enabled for the local API.
+- Clarify installation state and simplify plugin instructions.
+
+## 0.1.3 - 2026-08-15
+
+- Add a demo video and improve the documentation.
+
+## 0.1.2 - 2026-08-15
+
+- Add folder management to the bar panel.
+
+## 0.1.1 - 2026-08-14
+
+- Keep Syncthing package management explicit and monitor existing installs.
+- Show live file activity and refresh status after synchronization.
+
+## 0.1.0 - 2026-08-12
+
+- Initial release.

@@ -1,0 +1,124 @@
+{
+  "bar": {
+    "centerAnchor": "sirwizardlizard.calendar",
+    "layout": {
+      "center": [
+        {
+          "id": "omaplug"
+        },
+        {
+          "id": "a-weather-app.weather"
+        },
+        {
+          "id": "omarchy.clock"
+        },
+        {
+          "extractMode": "colorful",
+          "id": "io.github.chrisandtre.bing-wallpaper",
+          "screensaverCaption": true,
+          "showTitle": false
+        },
+        {
+          "id": "omacal.upcoming"
+        },
+        {
+          "id": "omarchy.tray"
+        }
+      ],
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "omarchy.workspaces"
+        },
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "omarchy.system-update"
+        },
+        {
+          "id": "omarchy.active-window"
+        }
+      ],
+      "right": [
+        {
+          "id": "chriopter.brumm"
+        },
+        {
+          "id": "jankeesvw.text-transform"
+        },
+        {
+          "id": "io.github.brukb.omarchy-zerotier"
+        },
+        {
+          "id": "io.github.ilyazar.syncthing"
+        },
+        {
+          "appearance": "System",
+          "contentDirection": "Auto",
+          "defaultQuery": "in:inbox",
+          "heavyMessageRendering": "Always render",
+          "id": "omamail",
+          "maxMessages": 25,
+          "notifyNewMail": "On",
+          "refreshIntervalSec": 120,
+          "showBarIcon": false,
+          "suggestEvents": false,
+          "undoSendSeconds": 10,
+          "unifiedCalendarView": false,
+          "unifiedMailboxes": false
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.network"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "omarchy.monitor"
+        },
+        {
+          "id": "omarchy.power"
+        },
+        {
+          "id": "lutfi.glass"
+        }
+      ]
+    },
+    "position": "top",
+    "transparent": false
+  },
+  "cloneSourceRestores": [
+    "io.github.sirjul1337.lock-explorer"
+  ],
+  "disabledPlugins": [
+    "omarchy.lock",
+    "omarchy.battery",
+    "omarchy.disk-speedtest",
+    "omarchy.wifiqr"
+  ],
+  "idle": {
+    "lock": 300,
+    "screensaver": 150
+  },
+  "plugins": [
+    {
+      "blankMs": 60000,
+      "design": "editorial",
+      "id": "io.github.sirjul1337.lock-explorer",
+      "keepDisplayOn": true,
+      "powerActions": true,
+      "unlock": "zoom",
+      "wakeGraceMs": 2000
+    }
+  ],
+  "version": 1
+}
