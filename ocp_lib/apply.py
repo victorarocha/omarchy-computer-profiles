@@ -10,25 +10,15 @@ def command(args):
 
 def download(url):
     request=urllib.request.Request(url,headers={'User-Agent':'omarchy-computer-profiles/0.1'})
-    with urllib.request.urlopen(request,timeout=60) as response: return response.read(160*1024*1024)
+    with urllib.request.urlopen(request,timeout=60) as response:
+        data=response.read(512*1024*1024+1)
+        if len(data)>512*1024*1024: raise ValueError('Release download exceeds 512 MiB')
+        return data
 
 def lock(folder):
     m=validate(folder)
-    for app in m['software']:
-        if app['id']!='brumm': continue
-        if not app['tag'] or not app['asset']: raise ValueError('Install a supported brumm release before capturing, or specify tag and asset in profile.json')
-        release=json.loads(download(f"https://api.github.com/repos/chriopter/brumm/releases/tags/{app['tag']}"))
-        matches=[a for a in release['assets'] if a['name']==app['asset']]
-        if len(matches)!=1: raise ValueError('brumm asset not found in specified release')
-        a=matches[0];expected=f"https://github.com/chriopter/brumm/releases/download/{app['tag']}/{app['asset']}"
-        if a['browser_download_url']!=expected: raise ValueError('Unexpected release asset URL')
-        reported=a.get('digest','')
-        if not reported.startswith('sha256:'): raise ValueError('Release has no published SHA-256 digest')
-        # Verify actual asset bytes too; lock command never executes downloaded code.
-        blob=download(expected)
-        if digest(blob)!=reported[7:]: raise ValueError('Release asset checksum mismatch')
-        app['sha256']=reported[7:]
-    m['warnings']=[w for w in m['warnings'] if not w.startswith('brumm release digest')]
+    from .software import resolve_apps
+    m=resolve_apps(m,download)
     (folder/'profile.json').write_text(json.dumps(m,indent=2)+'\n');validate(folder)
     print('Locked and verified release assets for',m['id'])
 
@@ -96,7 +86,7 @@ def restore(folder,execute_changes=False):
         target=pathlib.Path(entry['target']);ensure_no_links(target)
         relative=str(target.relative_to(home)) if target.is_relative_to(home) else str(target).lstrip('/')
         scope='home' if target.is_relative_to(home) else 'system'
-        if not allowed_file(scope,relative) and relative not in ['etc/default/limine','.local/bin/brumm','.local/bin/brumm-gui','.local/share/applications/brumm.desktop','.config/systemd/user/brumm.service','.local/share/brumm/LICENSE']:
+        if not allowed_file(scope,relative) and relative not in ['etc/default/limine','.local/bin/brumm','.local/bin/brumm-gui','.local/share/applications/brumm.desktop','.config/systemd/user/brumm.service','.local/share/brumm/LICENSE','.local/bin/bruno','.local/share/applications/ocp-bruno.desktop']:
             raise ValueError('Invalid restore target')
         print('Restore',target)
         if not execute_changes: continue
@@ -127,6 +117,46 @@ def install_brumm(app,tx,home):
             tx.put(home/dest,data,mode)
     command(['systemctl','--user','daemon-reload'])
 
+def install_pinned_packages(apps,yes=False):
+    import base64, urllib.parse
+    if not apps: return
+    with tempfile.TemporaryDirectory(prefix='ocp-packages-') as tmp:
+        paths=[]
+        for app in apps:
+            pin=app['pin'];blob=download(pin['url'])
+            if digest(blob)!=pin['sha256']: raise ValueError(f"{app['id']} package checksum mismatch")
+            filename=urllib.parse.unquote(urllib.parse.urlsplit(pin['url']).path.rsplit('/',1)[-1])
+            if pathlib.PurePosixPath(filename).name!=filename or '\\' in filename: raise ValueError('Unsafe package filename')
+            path=pathlib.Path(tmp)/filename;path.write_bytes(blob)
+            path.with_name(filename+'.sig').write_bytes(base64.b64decode(pin['signature'],validate=True))
+            identity=execute(['pacman','-Qp',path]).strip()
+            if identity!=f"{app['package']} {pin['version']}": raise ValueError('Pinned package identity/version mismatch')
+            # Check trusted signatures before any package installation or upgrade.
+            command(['pacman-key','--verify',str(path)+'.sig',path])
+            paths.append(path)
+        command(['sudo','pacman','-U',*(['--noconfirm'] if yes else []),*paths])
+        for app in apps:
+            if execute(['pacman','-Q',app['package']]).strip()!=f"{app['package']} {app['pin']['version']}":
+                raise ValueError(f"{app['id']} installed package does not match its pin")
+
+def install_bruno(app,yes=False,tx=None,home=None):
+    if app.get('provider')=='github-appimage':
+        pin=app['pin'];blob=download(pin['url'])
+        if digest(blob)!=pin['sha256']: raise ValueError('Bruno AppImage checksum mismatch')
+        tx.put(home/'.local/bin/bruno',blob,0o755)
+        desktop='[Desktop Entry]\nType=Application\nName=Bruno\nExec=bruno\nTerminal=false\nCategories=Development;\n'
+        tx.put(home/'.local/share/applications/ocp-bruno.desktop',desktop.encode(),0o644)
+        return
+    command(['flatpak','remote-add','--user','--if-not-exists','flathub','https://dl.flathub.org/repo/flathub.flatpakrepo'])
+    ref=f"com.usebruno.Bruno/{app.get('pin',{}).get('architecture','x86_64')}/stable"
+    command(['flatpak','install','--user',*(['-y'] if yes else []),'flathub',ref])
+    if app.get('pin'):
+        commit=app['pin']['commit']
+        command(['flatpak','update','--user',*(['-y'] if yes else []),'--commit='+commit,ref])
+        installed=execute(['flatpak','info','--user','--show-commit',ref]).strip()
+        if installed!=commit: raise ValueError('Bruno deployed commit does not match its pin')
+
+
 def apply(folder, sections, execute_changes=False, yes=False, allow_variant=False):
     m=validate(folder);home=pathlib.Path.home();system=pathlib.Path('/')
     if not sections or sections-SECTIONS: raise ValueError('Invalid sections')
@@ -145,9 +175,15 @@ def apply(folder, sections, execute_changes=False, yes=False, allow_variant=Fals
         print('Write',target)
         if execute_changes: ensure_no_links(target)
         writes.append((f,target))
+    from .software import selected, OPTIONAL_APPS
+    apps=[a for a in m['software'] if selected(a)]
     if 'software' in sections:
-        print('Install: ZapFast, brumm, Flatpak, Bruno, Google Chrome, Obsidian')
-        for app in m['software']:
+        print('Install:',', '.join(a['id'] for a in apps))
+        for app in apps:
+            if app.get('pin'): print('  Pin:',app['id'],app['pin'].get('version') or app['pin'].get('commit'))
+            if 'included' in app and app['id'] in OPTIONAL_APPS and not app.get('pin'):
+                if execute_changes: raise ValueError(f"{app['id']} is not pinned; run ocp lock PROFILE first")
+                print('UNRESOLVED:',app['id'])
             if app['id']=='brumm' and (not app.get('sha256') or not app.get('tag') or not app.get('asset')):
                 if execute_changes: raise ValueError('brumm is not locked: run ocp lock PROFILE first')
                 print('UNRESOLVED: run ocp lock to verify brumm release')
@@ -162,6 +198,8 @@ def apply(folder, sections, execute_changes=False, yes=False, allow_variant=Fals
     required=['sudo']
     if sections & {'hardware','software'}: required += ['pacman','yay']
     if 'hardware' in sections: required += ['mkinitcpio','systemctl']
+    if 'software' in sections and any(a.get('pin') and a['id'] in ['flatpak','google-chrome'] for a in apps): required += ['pacman-key']
+    if 'software' in sections and any(a['id']=='brumm' for a in apps): required += ['systemctl']
     if 'boot' in sections: required += ['limine-update']
     for cmd in required:
         if not shutil.which(cmd): raise ValueError(f'Required command missing: {cmd}')
@@ -172,16 +210,21 @@ def apply(folder, sections, execute_changes=False, yes=False, allow_variant=Fals
         if 'hardware' in sections:
             for pkg in m['hardware_packages']: (aur if pkg['provider']=='aur' else arch).append(pkg['name'])
         if 'software' in sections:
-            arch += ['flatpak','google-chrome','obsidian','qt6-multimedia']
-            # Prefer current configured repositories, then AUR, matching Omarchy's package source.
-            if execute(['pacman','-Si','zapfast-bin'],optional=True): arch.append('zapfast-bin')
-            else: aur.append('zapfast-bin')
+            for app in apps:
+                if app['id'] in ['brumm','bruno']: continue
+                if app.get('pin'): continue # Exact package artifacts are installed below.
+                if execute(['pacman','-Si',app['package']],optional=True): arch.append(app['package'])
+                else: aur.append(app['package'])
+            if any(a['id']=='brumm' for a in apps): arch.append('qt6-multimedia')
+            if any(a.get('provider')=='github-appimage' for a in apps): arch.append('fuse2')
         if arch: command(['sudo','pacman','-Syu','--needed',*(['--noconfirm'] if yes else []),*sorted(set(arch))])
         if aur: command(['yay','-S','--needed',*(['--noconfirm'] if yes else []),*sorted(set(aur))])
         if 'software' in sections:
-            command(['flatpak','remote-add','--user','--if-not-exists','flathub','https://dl.flathub.org/repo/flathub.flatpakrepo'])
-            command(['flatpak','install','--user',*(['-y'] if yes else []),'flathub','com.usebruno.Bruno//stable'])
-            install_brumm(next(x for x in m['software'] if x['id']=='brumm'),tx,home)
+            install_pinned_packages([a for a in apps if a['id'] in ['flatpak','google-chrome'] and a.get('pin')],yes)
+            bruno=next((a for a in apps if a['id']=='bruno'),None)
+            if bruno: install_bruno(bruno,yes,tx,home)
+            brumm=next((a for a in apps if a['id']=='brumm'),None)
+            if brumm: install_brumm(brumm,tx,home)
         for f,target in writes:
             data=(folder/'files'/f['scope']/f['path']).read_bytes()
             from .core import ASSET_SUFFIXES

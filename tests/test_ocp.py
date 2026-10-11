@@ -43,6 +43,10 @@ class CaptureTests(unittest.TestCase):
             p=self.home/'.config/omarchy/plugins'/name;p.mkdir(parents=True)
             (p/'manifest.json').write_text(json.dumps({'id':name,'version':'1.0','license':'MIT'}));(p/'Panel.qml').write_text('Item {}')
             (p/'preview.png').write_bytes(b'\x89PNG\x00image')
+        self.path_lookup=patch('ocp_lib.core.shutil.which',return_value=None);self.path_lookup.start()
+        self.addCleanup(self.path_lookup.stop)
+        self.choices=patch('ocp_lib.software.ask_apps',return_value={app:True for app in ['brumm','flatpak','google-chrome','bruno']});self.choices.start()
+        self.addCleanup(self.choices.stop)
         self.release_lock=patch('ocp_lib.apply.lock');self.release_lock.start()
         self.addCleanup(self.release_lock.stop)
         self.author_prompt=patch('builtins.input',return_value='Test Author');self.author_prompt.start()
@@ -58,6 +62,8 @@ class CaptureTests(unittest.TestCase):
         def verify(folder):
             self.assertFalse((self.profiles/'example-model').exists())
             m=json.loads((folder/'profile.json').read_text())
+            for optional in m['software']:
+                if optional['id'] in ['flatpak','google-chrome','bruno']: optional.update(included=False,requested=False)
             app=next(x for x in m['software'] if x['id']=='brumm')
             app.update(tag='v1.0.1',asset='brumm-linux-amd64.tar.gz')
             (folder/'profile.json').write_text(json.dumps(m))
@@ -72,9 +78,17 @@ class CaptureTests(unittest.TestCase):
         self.assertNotIn('ocp lock',(folder/'README.md').read_text())
     def test_capture_verification_failure_does_not_publish_profile(self):
         with patch('ocp_lib.apply.lock',side_effect=ValueError('Release asset checksum mismatch')):
-            with self.assertRaisesRegex(ValueError,'Capture could not verify brumm release'): self.capture()
+            with self.assertRaisesRegex(ValueError,'Capture could not pin selected applications'): self.capture()
         self.assertFalse((self.profiles/'example-model').exists())
         self.assertEqual(list(self.profiles.iterdir()),[])
+    def test_capture_all_optional_apps_excluded_needs_no_release_network(self):
+        self.release_lock.stop()
+        with patch('ocp_lib.software.ask_apps',return_value={app:False for app in ['brumm','flatpak','google-chrome','bruno']}),patch('ocp_lib.apply.download') as fetch:
+            folder=self.capture()
+        fetch.assert_not_called()
+        m=validate(folder)
+        for app in m['software']:
+            if app['id'] in ['brumm','flatpak','google-chrome','bruno']: self.assertFalse(app['included'])
     def test_author_prompt_retries_blank_and_records_trimmed_name(self):
         with patch('builtins.input',side_effect=['', '  ', '  Ada Lovelace  ']) as prompt:
             folder=self.capture()

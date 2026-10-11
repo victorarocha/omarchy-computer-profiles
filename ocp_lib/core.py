@@ -216,6 +216,8 @@ def capture(profile_id=None, home=None, system=None, profiles=None, note=''):
         except EOFError: raise ValueError('Author name is required; capture needs interactive input') from None
         if author and not any(ord(c)<32 or ord(c)==127 for c in author): break
         print('Enter a nonempty author name without control characters.')
+    from .software import ask_apps, selection_metadata
+    choices=ask_apps()
     home=home or pathlib.Path.home();system=system or pathlib.Path('/');profiles=profiles or ROOT/'profiles'
     hw=hardware(system);profile_id=safe_id(profile_id or slug(hw['vendor']+'-'+hw['model']))
     destination=profiles/profile_id
@@ -231,6 +233,7 @@ def capture(profile_id=None, home=None, system=None, profiles=None, note=''):
         for relative in sorted(HOME_FILES):
             source=home/relative
             if not source.is_file(): continue
+            if relative=='.config/brumm/options.json' and not choices['brumm']: continue
             if source.suffix=='.json':
                 obj=json.loads(source.read_text())
                 if relative=='.config/zapfast/settings.json':
@@ -253,13 +256,18 @@ def capture(profile_id=None, home=None, system=None, profiles=None, note=''):
         software=[{'id':app,'provider':'arch-package','package':pkg,'captured_version':installed.get(pkg),'installed':pkg in installed} for app,pkg in APP_PACKAGES.items()]
         software.append({'id':'bruno','provider':'flatpak','remote':'flathub','ref':'com.usebruno.Bruno//stable'})
         brumm=home/'.local/bin/brumm'
-        version=execute([brumm,'version'],optional=True).strip() if brumm.exists() else ''
+        if not brumm.exists(): brumm=pathlib.Path(shutil.which('brumm') or '/nonexistent-ocp-brumm')
+        version=execute([brumm,'version'],optional=True).strip() if choices['brumm'] and brumm.exists() else ''
         match=re.search(r'\bv(\d+\.\d+\.\d+)\b',version)
         software.append({'id':'brumm','provider':'github-release','repository':'chriopter/brumm',
                          'tag':'v'+match.group(1) if match else None,'asset':'brumm-linux-amd64.tar.gz' if hw['architecture']=='x86_64' else None,
                          'sha256':None})
-        warnings.append('brumm release digest must be resolved with ocp lock before applying software.')
+        if choices['brumm'] and brumm.exists() and not match:
+            raise ValueError('Cannot determine the installed brumm version; refusing to substitute latest')
+        software=[selection_metadata(app,choices) for app in software]
         plugins=capture_plugins(folder,entries,home,shell,warnings)
+        if not choices['brumm'] and any(p['id']=='chriopter.brumm' for p in plugins):
+            warnings.append('The captured brumm plugin requires the brumm application, which was excluded.')
         services=[name for name in sorted(SERVICES) if any((system/'etc/systemd/system').glob(f'*.wants/{name}'))]
         if any(x['path']=='etc/mbpfan.conf' for x in entries): warnings.append('Verify fan RPM limits against target applesmc hardware before applying.')
         if any(review.values()): warnings.append('Unclassified kernel options were recorded for review and are not applied.')
@@ -273,10 +281,10 @@ def capture(profile_id=None, home=None, system=None, profiles=None, note=''):
               'files':sorted(entries,key=lambda x:(x['scope'],x['path'])),'warnings':warnings}
         (folder/'profile.json').write_text(json.dumps(data,indent=2)+'\n')
         from .apply import lock
-        print('Verifying and pinning brumm release…',flush=True)
+        print('Verifying and pinning selected applications…',flush=True)
         try: lock(folder)
         except (OSError, ValueError) as error:
-            raise ValueError(f'Capture could not verify brumm release: {error}. No profile was created; retry capture when resolved.') from error
+            raise ValueError(f'Capture could not pin selected applications: {error}. No profile was created; retry capture when resolved.') from error
         data=json.loads((folder/'profile.json').read_text())
         warnings=data['warnings']
         (folder/'README.md').write_text(f'# {hw["vendor"]} {hw["model"]}\n\n{data["description"]}\n\nAuthor: {author}\n\nStatus: captured; not independently tested.\n\n'+
@@ -326,15 +334,25 @@ def validate(folder):
     if set(m['services'])-SERVICES: raise ValueError('Unsupported hardware service')
     for plugin in m['plugins']:
         if not re.fullmatch(r'[A-Za-z0-9_.-]+',plugin['id']): raise ValueError('Invalid plugin ID')
+    from .software import validate_pin
     for app in m['software']:
+        for flag in ['included','requested']:
+            if flag in app and not isinstance(app[flag],bool): raise ValueError('Invalid application selection')
+        validate_pin(app,m['hardware']['architecture'])
         if app['id'] not in {*APP_PACKAGES,'bruno','brumm'}: raise ValueError('Unknown software recipe')
         if app['id'] in APP_PACKAGES and app.get('package')!=APP_PACKAGES[app['id']]: raise ValueError('Modified app recipe')
-        if app['id']=='bruno' and (app.get('remote')!='flathub' or app.get('ref')!='com.usebruno.Bruno//stable'): raise ValueError('Modified Bruno recipe')
+        if app['id']=='bruno' and app.get('provider')!='github-appimage' and (app.get('remote')!='flathub' or app.get('ref')!='com.usebruno.Bruno//stable'): raise ValueError('Modified Bruno recipe')
+        if app['id']=='bruno' and app.get('provider')=='github-appimage' and (app.get('repository')!='usebruno/bruno' or app.get('pin',{}).get('kind')!='appimage'):
+            raise ValueError('Modified Bruno AppImage recipe')
         if app['id']=='brumm':
             if app.get('repository')!='chriopter/brumm': raise ValueError('Modified brumm origin')
             if app.get('tag') is not None and not re.fullmatch(r'v\d+\.\d+\.\d+',app['tag']): raise ValueError('Invalid brumm tag')
             if app.get('asset') not in [None,'brumm-linux-amd64.tar.gz','brumm-linux-arm64.tar.gz']: raise ValueError('Invalid brumm asset')
             if app.get('sha256') is not None and not re.fullmatch(r'[0-9a-f]{64}',app['sha256']): raise ValueError('Invalid brumm digest')
+    apps_by_id={a['id']:a for a in m['software']}
+    bruno=apps_by_id['bruno'];flatpak=apps_by_id['flatpak']
+    if bruno.get('included',True) and bruno.get('provider')!='github-appimage' and not flatpak.get('included',True):
+        raise ValueError('Selected Flathub Bruno requires Flatpak in the profile')
     actual={str(p.relative_to(folder/'files')) for p in (folder/'files').rglob('*') if p.is_file()}
     expected={f"{x['scope']}/{x['path']}" for x in m['files']}
     if actual!=expected: raise ValueError('Unmanifested or missing profile files')

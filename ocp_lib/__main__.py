@@ -11,7 +11,7 @@ def main():
     sub.add_parser('list',help='List repository profiles')
     sub.add_parser('detect',help='Print hardware identifiers (no serial numbers)')
     for name in ['show','validate','lock','apply','share']:
-        item=sub.add_parser(name,help={'show':'Print a profile','validate':'Validate schema, paths and checksums','lock':'Resolve and verify brumm release checksum','apply':'Preview/apply an existing profile','share':'Stage/commit a profile; optionally push to your configured remote'}[name])
+        item=sub.add_parser(name,help={'show':'Print a profile','validate':'Validate schema, paths and checksums','lock':'Resolve and verify selected application versions','apply':'Preview/apply an existing profile','share':'Stage/commit a profile; optionally push to your configured remote'}[name])
         item.add_argument('profile')
         if name=='apply':
             item.add_argument('--sections',default=','.join(sorted(SECTIONS)),help='Comma-separated hardware,boot,software,plugins,preferences')

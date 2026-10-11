@@ -53,15 +53,26 @@ Every capture prompts for an author name and requires a nonempty response. The
 name is stored in `profile.json`, included in its README, and displayed by
 `./ocp list`. Older profiles without author metadata display `Unknown`.
 
+Capture asks four separate yes/no questions:
+
+```text
+Include brumm? [y/n]:
+Include Flatpak? [y/n]:
+Include Google Chrome? [y/n]:
+Include Bruno? [y/n]:
+```
+
+For each selected app, an installed version is pinned exactly. If it is absent,
+capture resolves a stable release for the current CPU architecture. Excluded apps
+are recorded as excluded and skipped during resolution and installation. ZapFast
+and Obsidian remain standard profile applications.
+
 Capture reads local files and creates `profiles/<id>/`; it does not change the
-computer's configuration or install software. It automatically downloads and
-verifies brumm's release before saving the completed profile, so capture requires
-network access. If verification fails, capture stops without publishing a partial
-profile; resolve the error and rerun the same command. An existing profile is never
-overwritten: use a new variant ID or edit the original with a reviewed Git diff.
-Automatic release verification downloads metadata and the brumm archive, verifies its published
-SHA-256 and stores the checksum. It never executes the downloaded release. The standalone `ocp lock <profile>`
-command remains available to re-verify an existing profile.
+computer's configuration or install software. Release resolution is automatic and
+may require internet access. If a selected release cannot be pinned, capture stops
+without publishing a partial profile; resolve the error and retry. Existing
+profiles are never overwritten. `ocp lock <profile>` can resolve missing pins for
+an existing profile; existing pins are retained.
 
 Review the profile's `README.md`, warnings, included files and software versions.
 Test the profile on matching hardware and record the results. Then share through
@@ -90,7 +101,7 @@ clone. Files in `profiles/` are ordinary versioned repository files.
 | Services | Enabled mbpfan and thermald services when present |
 | Plugins | Installed user plugins except IDs in `disabledPlugins`; source revision/origin, local edits, code, images and native ELF helpers |
 | Preferences | Monitor/input settings, Omarchy shell layout, Magic Trackpad settings, selected ZapFast appearance options and brumm display options |
-| Software | Installation recipes for the six common applications; installed package versions recorded where available |
+| Software | Application inclusion choices and exact optional-app pins; standard app and hardware versions recorded |
 
 Built-in shell plugins remain supplied by Omarchy; the shell configuration records
 which ones are disabled. When the shell isn't running, plugin detection uses the
@@ -127,15 +138,43 @@ without sourcing shell scripts; dynamic assignments are rejected.
 
 ### Software
 
-Arch repository packages are installed through pacman, with ZapFast falling back
-to AUR via yay. Hardware AUR packages use their recorded provider. Pacman performs
-a full system upgrade when installing packages; versions are recorded for context,
-not frozen or downgraded. Bruno is installed per-user from Flathub, following
-[Bruno's published installation method](https://www.usebruno.com/downloads) and
-[Flatpak's CLI documentation](https://docs.flatpak.org/en/latest/using-flatpak.html).
-Brumm uses a pinned [upstream release](https://github.com/chriopter/brumm/releases),
-verified before extracting a fixed list of files. Its subscription/sign-in is
-left to each user. The ZapFast package follows its [upstream Arch instructions](https://zapfast.rocks/download/).
+The four optional applications use these pins:
+
+| Application | Installed on source | Absent on source |
+| --- | --- | --- |
+| brumm | Installed release tag and verified archive SHA-256 | Newest stable GitHub release with an asset for the architecture |
+| Flatpak | Exact pacman package version, artifact URL, SHA-256 and signature | Newest package in the source's configured compatible repositories |
+| Google Chrome | Exact pacman package version, artifact URL, SHA-256 and signature | Newest package available for the architecture in configured repositories |
+| Bruno | Installed Flathub commit; for native pacman Bruno, its installed upstream version via official AppImage | Current stable Flathub commit for the architecture |
+
+Bruno's Flathub installation requires Flatpak. If Bruno is selected and Flatpak is
+answered “no”, Flatpak is included and pinned as an explicit runtime dependency;
+capture explains this before resolution. Native Bruno is pinned as the same
+upstream AppImage version and does not force that dependency. Flatpak-based Bruno
+is installed per-user and deployed to the pinned commit, which OCP verifies.
+Native Bruno is installed under `~/.local/bin/bruno` with a launcher entry; it
+requires the `fuse2` package.
+
+Flatpak and Chrome packages are installed with `pacman -U` after checking their
+artifact hash, package name/version and trusted signature. They are not silently
+substituted with the repository's current release. Source sync databases and
+package caches help resolve installed versions; old Flatpak versions can also use
+the Arch Linux Archive. If an exact installed artifact cannot be identified,
+capture fails with an explanation instead of choosing latest. Retain a mirror of
+pinned packages for long-lived fleet profiles: upstream mirrors may remove old
+artifacts, and dependency compatibility can change with rolling system updates.
+
+Pacman still performs full system upgrades for hardware packages, standard apps
+and dependencies. Those dependencies, ZapFast and Obsidian are not version-pinned.
+Application pins control the OCP deployment; they do not disable future normal
+system or app updates. Legacy profiles without selection/pin metadata retain their
+original all-app installation behavior until recaptured or locked.
+
+Brumm uses a pinned [upstream release](https://github.com/chriopter/brumm/releases).
+Bruno follows its [published installation methods](https://www.usebruno.com/downloads)
+and [Flatpak commit deployment](https://docs.flatpak.org/en/latest/flatpak-command-reference.html).
+The ZapFast package follows its [upstream Arch instructions](https://zapfast.rocks/download/).
+Accounts, subscriptions and sign-in remain individual to each user.
 
 ## Apply selected sections
 
