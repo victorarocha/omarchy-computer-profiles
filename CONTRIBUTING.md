@@ -2,7 +2,7 @@
 
 1. Begin with a working, updated Omarchy installation.
 2. Capture a profile with a meaningful model/variant ID and description; enter your author name when prompted.
-3. Run `ocp lock`, `ocp validate` and inspect the preview.
+3. Capture automatically verifies/pins brumm; run `ocp validate` and inspect the preview.
 4. Review all included files, kernel options, licenses and capture warnings.
 5. Apply to another computer with matching hardware when possible.
 6. Record actual results in the profile README and `validation.notes`.

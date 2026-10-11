@@ -43,11 +43,38 @@ class CaptureTests(unittest.TestCase):
             p=self.home/'.config/omarchy/plugins'/name;p.mkdir(parents=True)
             (p/'manifest.json').write_text(json.dumps({'id':name,'version':'1.0','license':'MIT'}));(p/'Panel.qml').write_text('Item {}')
             (p/'preview.png').write_bytes(b'\x89PNG\x00image')
+        self.release_lock=patch('ocp_lib.apply.lock');self.release_lock.start()
+        self.addCleanup(self.release_lock.stop)
         self.author_prompt=patch('builtins.input',return_value='Test Author');self.author_prompt.start()
         self.addCleanup(self.author_prompt.stop)
         self.patcher=patch('ocp_lib.core.execute',return_value='');self.patcher.start()
     def tearDown(self): self.patcher.stop();self.tmp.cleanup()
     def capture(self): return capture('example-model',self.home,self.system,self.profiles)
+    def test_capture_verifies_release_before_publishing_profile(self):
+        # Exercise the real verification logic, with deterministic public-release responses.
+        self.release_lock.stop()
+        from ocp_lib.apply import lock as real_lock
+        blob=b'verified release archive';checksum=digest(blob)
+        def verify(folder):
+            self.assertFalse((self.profiles/'example-model').exists())
+            m=json.loads((folder/'profile.json').read_text())
+            app=next(x for x in m['software'] if x['id']=='brumm')
+            app.update(tag='v1.0.1',asset='brumm-linux-amd64.tar.gz')
+            (folder/'profile.json').write_text(json.dumps(m))
+            metadata={'assets':[{'name':app['asset'],'browser_download_url':f"https://github.com/chriopter/brumm/releases/download/{app['tag']}/{app['asset']}",'digest':'sha256:'+checksum}]}
+            with patch('ocp_lib.apply.download',side_effect=[json.dumps(metadata).encode(),blob]): real_lock(folder)
+        with patch('ocp_lib.apply.lock',side_effect=verify) as lock_call:
+            folder=self.capture()
+        lock_call.assert_called_once()
+        m=validate(folder)
+        self.assertEqual(next(x for x in m['software'] if x['id']=='brumm')['sha256'],checksum)
+        self.assertFalse(any('ocp lock' in w for w in m['warnings']))
+        self.assertNotIn('ocp lock',(folder/'README.md').read_text())
+    def test_capture_verification_failure_does_not_publish_profile(self):
+        with patch('ocp_lib.apply.lock',side_effect=ValueError('Release asset checksum mismatch')):
+            with self.assertRaisesRegex(ValueError,'Capture could not verify brumm release'): self.capture()
+        self.assertFalse((self.profiles/'example-model').exists())
+        self.assertEqual(list(self.profiles.iterdir()),[])
     def test_author_prompt_retries_blank_and_records_trimmed_name(self):
         with patch('builtins.input',side_effect=['', '  ', '  Ada Lovelace  ']) as prompt:
             folder=self.capture()

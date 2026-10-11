@@ -6,7 +6,7 @@ def main():
     parser=argparse.ArgumentParser(prog='ocp',description='OCP — share working Omarchy configurations by computer model')
     parser.add_argument('--version',action='version',version=VERSION)
     sub=parser.add_subparsers(dest='command',required=True)
-    create=sub.add_parser('capture',help='Create a new profile from this computer, without changing system settings')
+    create=sub.add_parser('capture',help='Capture this computer and verify/pin release downloads in one step')
     create.add_argument('--id');create.add_argument('--description',default='')
     sub.add_parser('list',help='List repository profiles')
     sub.add_parser('detect',help='Print hardware identifiers (no serial numbers)')

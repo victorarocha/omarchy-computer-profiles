@@ -45,7 +45,6 @@ Start on a machine where Omarchy already works well:
 ./ocp capture                             # automatic vendor/model ID
 # Or identify a particular hardware variant:
 ./ocp capture --id apple-macpro6-1-d500 --description "Mac Pro 2013, D500 GPUs"
-./ocp lock apple-macpro6-1-d500            # verify/pin brumm's release archive
 ./ocp validate apple-macpro6-1-d500
 ./ocp apply apple-macpro6-1-d500           # inspect the plan
 ```
@@ -55,10 +54,14 @@ name is stored in `profile.json`, included in its README, and displayed by
 `./ocp list`. Older profiles without author metadata display `Unknown`.
 
 Capture reads local files and creates `profiles/<id>/`; it does not change the
-computer's configuration or install software. An existing profile is never
+computer's configuration or install software. It automatically downloads and
+verifies brumm's release before saving the completed profile, so capture requires
+network access. If verification fails, capture stops without publishing a partial
+profile; resolve the error and rerun the same command. An existing profile is never
 overwritten: use a new variant ID or edit the original with a reviewed Git diff.
-The lock step downloads metadata and the brumm archive, verifies its published
-SHA-256 and stores the checksum. It never executes the downloaded release.
+Automatic release verification downloads metadata and the brumm archive, verifies its published
+SHA-256 and stores the checksum. It never executes the downloaded release. The standalone `ocp lock <profile>`
+command remains available to re-verify an existing profile.
 
 Review the profile's `README.md`, warnings, included files and software versions.
 Test the profile on matching hardware and record the results. Then share through

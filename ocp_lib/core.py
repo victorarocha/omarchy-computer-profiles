@@ -272,6 +272,13 @@ def capture(profile_id=None, home=None, system=None, profiles=None, note=''):
               'plugin_detection':'All installed user plugins except disabledPlugins; built-ins remain supplied by Omarchy.',
               'files':sorted(entries,key=lambda x:(x['scope'],x['path'])),'warnings':warnings}
         (folder/'profile.json').write_text(json.dumps(data,indent=2)+'\n')
+        from .apply import lock
+        print('Verifying and pinning brumm release…',flush=True)
+        try: lock(folder)
+        except (OSError, ValueError) as error:
+            raise ValueError(f'Capture could not verify brumm release: {error}. No profile was created; retry capture when resolved.') from error
+        data=json.loads((folder/'profile.json').read_text())
+        warnings=data['warnings']
         (folder/'README.md').write_text(f'# {hw["vendor"]} {hw["model"]}\n\n{data["description"]}\n\nAuthor: {author}\n\nStatus: captured; not independently tested.\n\n'+
             '## Contributor verification\n\nRecord display, audio, network, Bluetooth, suspend/resume, fan and boot results here.\n\n'+
             '## Capture warnings\n\n'+'\n'.join('- '+w for w in warnings)+'\n')
