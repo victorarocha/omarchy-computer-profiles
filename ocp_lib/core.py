@@ -293,7 +293,8 @@ def capture(profile_id=None, home=None, system=None, profiles=None, note=''):
         validate(folder);folder.rename(destination)
     return destination
 
-def validate(folder):
+def load_manifest(folder):
+    """Read and check manifest metadata without opening profile payload files."""
     if folder.is_symlink(): raise ValueError('Profile directory must not be a symlink')
     p=folder/'profile.json'
     if p.is_symlink(): raise ValueError('Profile manifest must not be a symlink')
@@ -310,6 +311,10 @@ def validate(folder):
     if not isinstance(m['hardware']['pci'],list): raise ValueError('Missing PCI inventory')
     if m['validation'].get('status')=='model-verified' and m['validation'].get('tested_on_other_machine') is not True:
         raise ValueError('Model verification requires another-machine testing')
+    return m
+
+def validate(folder):
+    m=load_manifest(folder)
     for scope,options in m['boot']['hardware_options'].items():
         if not re.fullmatch(r'[A-Za-z0-9_.+*-]+',scope): raise ValueError('Invalid Limine scope')
         portable,omitted,review=classify_options(options)

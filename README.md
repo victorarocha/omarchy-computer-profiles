@@ -52,6 +52,9 @@ Start on a machine where Omarchy already works well:
 Every capture prompts for an author name and requires a nonempty response. The
 name is stored in `profile.json`, included in its README, and displayed by
 `./ocp list`. Older profiles without author metadata display `Unknown`.
+Listing reads manifest metadata only, so large plugin snapshots do not slow it
+down. Use `./ocp validate <profile>` to check payload checksums and file safety;
+deployment also runs full validation.
 
 Capture asks four separate yes/no questions:
 

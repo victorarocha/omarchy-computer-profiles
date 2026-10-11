@@ -1,5 +1,5 @@
 import argparse, json, pathlib, subprocess, sys
-from .core import ROOT, VERSION, capture, validate, safe_id, hardware
+from .core import ROOT, VERSION, capture, validate, load_manifest, safe_id, hardware
 from .apply import apply, restore, lock, SECTIONS
 
 def main():
@@ -28,7 +28,7 @@ def main():
     if args.command=='list':
         print('PROFILE\tCOMPUTER\tSTATUS\tAUTHOR')
         for path in sorted((ROOT/'profiles').glob('*/profile.json')):
-            m=validate(path.parent);print(f"{m['id']}\t{m['hardware']['vendor']} {m['hardware']['model']}\t{m['validation']['status']}\t{m.get('author', 'Unknown')}")
+            m=load_manifest(path.parent);print(f"{m['id']}\t{m['hardware']['vendor']} {m['hardware']['model']}\t{m['validation']['status']}\t{m.get('author', 'Unknown')}")
         return
     folder=ROOT/'profiles'/safe_id(args.profile)
     m=validate(folder)

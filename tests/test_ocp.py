@@ -125,6 +125,21 @@ class CaptureTests(unittest.TestCase):
     def test_checksums_detect_tampering(self):
         folder=self.capture();(folder/'files/system/etc/modprobe.d/audio.conf').write_text('modified')
         with self.assertRaisesRegex(ValueError,'Checksum'): validate(folder)
+    def test_list_reads_metadata_without_scanning_payload(self):
+        import io,sys
+        from ocp_lib.__main__ import main
+        folder=self.capture()
+        (folder/'files/system/etc/modprobe.d/audio.conf').write_text('modified')
+        output=io.StringIO()
+        original_read=pathlib.Path.read_bytes
+        def reject_payload_read(path):
+            if folder/'files' in path.parents:
+                raise AssertionError('Listing must not read payload files')
+            return original_read(path)
+        with patch('ocp_lib.__main__.ROOT',self.base), patch.object(sys,'argv',['ocp','list']), patch('sys.stdout',output), patch('pathlib.Path.read_bytes',reject_payload_read), patch('ocp_lib.__main__.validate',side_effect=AssertionError('Listing must not run full validation')):
+            main()
+        self.assertIn('Test Author',output.getvalue())
+        with self.assertRaisesRegex(ValueError,'Checksum'): validate(folder)
     def test_manifest_path_traversal_refused(self):
         folder=self.capture();m=json.loads((folder/'profile.json').read_text());m['files'][0]['path']='../../etc/passwd'
         (folder/'profile.json').write_text(json.dumps(m))
