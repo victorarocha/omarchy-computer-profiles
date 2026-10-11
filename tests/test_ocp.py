@@ -28,7 +28,7 @@ class BootTests(unittest.TestCase):
     def test_spaced_acpi_option_round_trip(self):
         text=render_limine('',{'default':['root=UUID=TARGET']},{'default':['acpi_osi=Windows 2020']})
         self.assertEqual(parse_limine(text)['default'][-1],'acpi_osi=Windows 2020')
-        self.assertIn('acpi_osi="Windows 2020"',text)
+        self.assertIn('acpi_osi=\\"Windows 2020\\"',text)
     def test_missing_root_refused(self):
         with self.assertRaises(ValueError): render_limine('',{'default':['quiet']},{'default':['pcie_aspm=off']})
 

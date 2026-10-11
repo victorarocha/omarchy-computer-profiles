@@ -85,10 +85,11 @@ def parse_limine(text, initial=None):
         m=ASSIGN.fullmatch(line)
         if not m: raise ValueError('Unsupported Limine cmdline syntax; use one literal assignment per line')
         key,op,value=m.groups()
-        if '$' in value or '`' in value or '\\' in value: raise ValueError('Dynamic Limine options cannot be safely captured')
+        if '$' in value or '`' in value or '\\' in value.replace('\\"',''): raise ValueError('Dynamic Limine options cannot be safely captured')
         if value[:1] in ['"',"'"]:
             if value[-1:] != value[:1]: raise ValueError('Unbalanced Limine assignment')
             value=value[1:-1]
+        value=value.replace('\\"','"')
         tokens=shlex.split(value,comments=False)
         result[key]=(result.get(key,[]) if op=='+=' else [])+tokens
     return result
@@ -140,7 +141,8 @@ def render_limine(existing, states, profile_options):
             if not sep: raise ValueError('Invalid spaced kernel argument')
             return key+'="'+value+'"'
         value=' '.join(quote_option(x) for x in merged)
-        lines.append(f'KERNEL_CMDLINE[{scope}]={value}')
+        value=value.replace('"','\\"')
+        lines.append(f'KERNEL_CMDLINE[{scope}]="{value}"')
     lines.append(end)
     return existing.rstrip()+'\n\n'+'\n'.join(lines)+'\n'
 
