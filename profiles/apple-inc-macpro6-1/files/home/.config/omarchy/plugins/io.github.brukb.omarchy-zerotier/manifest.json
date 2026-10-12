@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.brukb.omarchy-zerotier",
+  "name": "ZeroTier",
+  "version": "0.9.4",
+  "author": "brukberhane",
+  "license": "MIT",
+  "description": "Manage ZeroTier client networks and local controller from the Omarchy bar. Unofficial; not affiliated with ZeroTier, Inc.",
+  "kinds": ["bar-widget"],
+  "entryPoints": { "barWidget": "BarWidget.qml" },
+  "barWidget": {
+    "displayName": "ZeroTier",
+    "description": "ZeroTier client and controller: networks, peers, members, flow rules. API token in OS keyring.",
+    "category": "Network",
+    "icon": "assets/zerotier-mark.svg",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "refreshIntervalSec": 15
+    },
+    "schema": [
+      {
+        "key": "refreshIntervalSec",
+        "type": "integer",
+        "label": "Refresh interval (seconds)",
+        "min": 5,
+        "max": 3600,
+        "step": 5,
+        "defaultValue": 15
+      }
+    ]
+  }
+}

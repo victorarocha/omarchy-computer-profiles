@@ -1,0 +1,243 @@
+@layer theme {
+:root {
+  --omarchy-palette: {{palette}};
+  color-scheme: {{mode}};
+  --color-page: {{background}};
+  --color-surface: {{surface}};
+  --color-surface-muted: {{surface_dark}};
+  --color-text: {{foreground}};
+  --color-text-strong: {{foreground_light}};
+  --color-text-muted: {{foreground_dark}};
+  --color-border: {{muted}};
+  --color-accent: {{accent}};
+  --color-info: {{cyan}};
+  --color-success: {{green}};
+  --color-warning: {{yellow}};
+  --color-warning-bright: {{bright_yellow}};
+  --color-danger: {{red}};
+  --color-focus: {{cyan}};
+  --color-semantic-text: {{background}};
+}
+
+body {
+  color: var(--color-text);
+  background-color: var(--color-page);
+}
+
+a {
+  color: var(--color-accent);
+}
+
+.text-primary {
+  color: {{blue}};
+}
+
+a:hover,
+a:focus,
+.text-info {
+  color: var(--color-info);
+}
+
+.navbar,
+.panel-footer,
+.modal-footer,
+.dropdown-menu,
+.open > .dropdown-toggle {
+  color: {{foreground}};
+  background-color: {{surface_dark}};
+  border-color: {{muted}};
+}
+
+.nav-tabs > li:not(.active):not(.disabled) > a,
+.navbar-text,
+.navbar-link,
+.dropdown > a,
+.dropdown-menu > li > a,
+.hidden-xs > a {
+  color: {{foreground}};
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus,
+.nav-tabs > li > a:hover,
+.nav-tabs > li > a:focus,
+li.hidden-xs:hover,
+.navbar-link:hover,
+.navbar-link:focus {
+  color: {{foreground_light}};
+  background-color: {{selection}};
+}
+
+.dropdown-menu > .active > a,
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+  color: {{foreground_light}};
+  background-color: {{selection}};
+  border-color: {{muted}};
+}
+
+.divider,
+.nav-tabs,
+.panel-group .panel-heading + .panel-collapse > .panel-body,
+.panel-group .panel-heading + .panel-collapse > .list-group {
+  border-color: {{muted}};
+}
+
+.divider,
+.nav-tabs {
+  background-color: {{muted}};
+}
+
+.panel,
+.modal-content,
+.popover {
+  color: {{foreground}};
+  background-color: {{background}};
+  border-color: {{muted}};
+}
+
+.panel-default > .panel-heading,
+.modal-header:not(.alert),
+.well,
+.form-control,
+.form-control[readonly="readonly"],
+.checkbox[disabled] {
+  color: {{foreground}};
+  background-color: {{surface}};
+  border-color: {{muted}};
+}
+
+.section-stripe,
+.table-striped > tbody > tr:nth-of-type(odd) {
+  background-color: {{surface_dark}};
+}
+
+.help-block,
+.checkbox[disabled] *,
+.checkbox[disabled] .help-block {
+  color: {{foreground_dark}};
+}
+
+.btn-default,
+.pagination > li > a,
+.pagination > li > span {
+  color: {{foreground}};
+  background-color: {{surface}};
+  border-color: {{muted}};
+}
+
+.btn-default:hover,
+.btn-default:focus,
+.pagination > li > a:hover,
+.pagination > li > a:focus {
+  color: {{foreground_light}};
+  background-color: {{selection}};
+}
+
+.btn-primary,
+.panel-progress,
+.progress-bar {
+  background-color: {{accent}};
+}
+
+.progress-bar-success {
+  background-color: {{green}};
+}
+
+.btn-info,
+.progress-bar-info {
+  background-color: {{magenta}};
+}
+
+.progress-bar-warning {
+  background-color: {{yellow}};
+}
+
+.progress-bar-danger {
+  background-color: {{red}};
+}
+
+.alert-info {
+  color: {{background}};
+  background-color: {{cyan}};
+}
+
+.btn-success,
+.alert-success,
+.panel-success > .panel-heading {
+  --semantic-fill: var(--color-success-fill);
+  --semantic-mix: var(--color-success-mix);
+  --semantic-pressed: var(--color-success-pressed);
+  --color-semantic-text: var(--color-success-text);
+}
+
+.btn-warning,
+.alert-warning,
+.panel-warning > .panel-heading {
+  --semantic-fill: var(--color-warning-fill);
+  --semantic-mix: var(--color-warning-mix);
+  --semantic-pressed: var(--color-warning-pressed);
+  --color-semantic-text: var(--color-warning-text);
+}
+
+.btn-danger,
+.alert-danger,
+.panel-danger > .panel-heading {
+  --semantic-fill: var(--color-danger-fill);
+  --semantic-mix: var(--color-danger-mix);
+  --semantic-pressed: var(--color-danger-pressed);
+  --color-semantic-text: var(--color-danger-text);
+}
+
+:is(.btn-success, .btn-warning, .btn-danger,
+    .alert-success, .alert-warning, .alert-danger,
+    .panel-success > .panel-heading, .panel-warning > .panel-heading,
+    .panel-danger > .panel-heading) {
+  color: var(--color-semantic-text);
+  background-color: var(--semantic-fill);
+  border-color: var(--semantic-fill);
+}
+
+:is(.btn-success, .btn-warning, .btn-danger):is(:hover, :focus, .focus) {
+  background-color: color-mix(in srgb, var(--semantic-fill) 90%, var(--semantic-mix));
+}
+
+:is(.btn-success, .btn-warning, .btn-danger):is(:active, .active),
+:is(.btn-success, .btn-warning, .btn-danger):is(:active, .active):is(:hover, :focus, .focus) {
+  background-color: color-mix(in srgb, var(--semantic-fill) var(--semantic-pressed), var(--semantic-mix));
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-warning {
+  color: {{orange}};
+}
+
+.folder-change-time,
+.review-rechecking {
+  color: var(--color-warning);
+}
+
+.text-danger {
+  color: var(--color-danger);
+}
+
+.identicon rect {
+  fill: {{foreground}};
+}
+
+.panel-success .identicon rect,
+.panel-warning .identicon rect,
+.panel-danger .identicon rect {
+  fill: var(--color-semantic-text);
+  color: var(--color-semantic-text);
+}
+
+.progress .frontal {
+  fill: {{background}};
+  color: {{background}};
+}
+}

@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "touchpad": {
+    "tapToClick": false,
+    "twoFingerRight": null,
+    "naturalScroll": null,
+    "disableWhileTyping": null,
+    "tapAndDrag": null,
+    "middleClickPaste": null
+  },
+  "scrollSpeed": null,
+  "gestures": {}
+}

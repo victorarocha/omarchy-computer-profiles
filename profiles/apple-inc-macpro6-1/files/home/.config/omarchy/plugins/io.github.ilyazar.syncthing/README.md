@@ -1,0 +1,398 @@
+<h1 align="center">Syncshell = <strong>Sync</strong>thing + quick<strong>shell</strong></h1>
+
+<p align="center">
+  <a href="https://github.com/omarchy-QOL/syncshell/actions/workflows/test.yml">
+    <img
+      alt="CI"
+      src="https://img.shields.io/github/actions/workflow/status/omarchy-QOL/syncshell/test.yml?branch=main&amp;style=flat-square&amp;logo=github&amp;logoColor=white&amp;label=CI&amp;labelColor=2e3440"
+    ></a>
+  <a href="https://app.codecov.io/gh/omarchy-QOL/syncshell">
+    <img
+      alt="Go core coverage"
+      src="https://img.shields.io/codecov/c/github/omarchy-QOL/syncshell/main?flag=core&amp;style=flat-square&amp;logo=codecov&amp;logoColor=white&amp;label=core%20coverage&amp;labelColor=2e3440&amp;color=F01F7A"
+    ></a>
+  <a href="https://github.com/omarchy-QOL/syncshell/releases">
+    <img
+      alt="Latest version"
+      src="https://img.shields.io/github/v/tag/omarchy-QOL/syncshell?sort=semver&amp;style=flat-square&amp;label=version&amp;logo=git&amp;logoColor=white&amp;labelColor=2e3440&amp;color=5e81ac"
+    ></a>
+  <a href="https://omarchy.org">
+    <img
+      alt="Omarchy plugin"
+      src="https://img.shields.io/badge/Omarchy-plugin-9ece6a?style=flat-square&amp;logo=archlinux&amp;logoColor=white&amp;labelColor=2e3440"
+    ></a>
+  <a href="https://github.com/syncthing/syncthing/releases/tag/v2.1.3">
+    <img
+      alt="Tested with Syncthing ≥ v2.1.3"
+      src="https://img.shields.io/badge/tested%20Syncthing-%E2%89%A5%20v2.1.3-26b6db?style=flat-square&amp;logo=syncthing&amp;logoColor=white&amp;labelColor=2e3440"
+    ></a>
+  <a href="LICENSE">
+    <img
+      alt="License"
+      src="https://img.shields.io/github/license/omarchy-QOL/syncshell?style=flat-square&amp;logo=opensourceinitiative&amp;logoColor=white&amp;labelColor=2e3440&amp;color=ebcb8b"
+    ></a>
+</p>
+
+Syncshell is a quickshell based plugin integration to
+[Syncthing](https://github.com/syncthing/syncthing). It shows syncing
+activity,support multi-folder and multi-device manages and ships an optional
+redesigned Web UI. Versions >= 0.1.8 use a bundled Go core since several Linux
+shell adapters are planned. Omarchy bar integration is stable. Remaining
+adapters are in alpha.
+
+![Redesigned web UI on the left and Syncshell plugin on the right](preview.png)
+
+## Demo videos
+
+These four videos cover live file activity, folder management, Web UI theming
+and icons, and device management taking Omarchy as an example.
+
+<!-- prettier-ignore -->
+> [!NOTE]
+> In the first two videos, the Hyprland window to the left of the plugin is not
+> part of the plugin. It live-tracks changes in the `test-source` directory for
+> illustration.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <a
+        href="https://omarchy-qol.github.io/syncshell/assets/published/01_syncthing_file_activity.mp4"
+      >
+        <img
+          src="assets/published/01_syncthing_file_activity.png"
+          alt="File activity and synchronization"
+        >
+      </a>
+      <p><strong>File activity</strong></p>
+      <p>
+        Copy and remove files while the panel reports live synchronization
+        activity.
+      </p>
+    </td>
+    <td width="50%" valign="top">
+      <a
+        href="https://omarchy-qol.github.io/syncshell/assets/published/02_syncthing_folder_lifecycle.mp4"
+      >
+        <img
+          src="assets/published/02_syncthing_folder_lifecycle.png"
+          alt="Unlink, link, and forget a folder"
+        >
+      </a>
+      <p><strong>Folder lifecycle</strong></p>
+      <p>
+        Unlink, relink, and forget a folder without deleting its local files.
+      </p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <a
+        href="https://omarchy-qol.github.io/syncshell/assets/published/03_syncthing_theme_aware_webUI.mp4"
+      >
+        <img
+          src="assets/published/03_syncthing_theme_aware_webUI.png"
+          alt="Theme-aware Syncthing Web UI"
+        >
+      </a>
+      <p><strong>Theme-aware Web UI, bar icon and settings</strong></p>
+      <p>
+        Redesigned modern web UI: switch to omarchy in the settings
+        to make it theme aware. Choose between a branded or themed bar icon.
+      </p>
+    </td>
+    <td width="50%" valign="top">
+      <a
+        href="https://omarchy-qol.github.io/syncshell/assets/published/04_syncthing_icon_change_and_other_settings.mp4"
+      >
+        <img
+          src="assets/published/04_syncthing_icon_change_and_other_settings.png"
+          alt="Syncthing device connections and folder sharing"
+        >
+      </a>
+      <p><strong>Multi-device management</strong></p>
+      <p>
+        Pause/resume syncing with a remote device and manage folder sharing:
+        remove/re-add a device by ID, unshare/re-share folders without
+        deleting local files.
+      </p>
+    </td>
+  </tr>
+</table>
+
+## Quick start
+
+- select the switch in the top right to start or stop the user service
+- use **Folders** to select a configured folder, then
+  - select **+** to configure a local directory
+  - use the share icon to choose which devices share it
+  - use the link/unlink icon to pause or resume synchronization
+  - select the folder icon on its card to open the directory
+- use **Devices** to add or select a remote device and manage its shared folders
+- expand **More** for folder errors and installation details
+- select **Web UI** for advanced Syncthing options
+- select the gear or press `s` for appearance settings and clean removal
+
+## Install
+
+```bash
+omarchy plugin add https://github.com/omarchy-QOL/syncshell.git --enable
+```
+
+Open the widget and expand **More**. If Syncthing is missing, select **Install
+Syncthing** to install the package and start the user service. On Omarchy, this
+uses `omarchy pkg add`, the same mechanism that manual package installation
+would normally use. Existing installations are detected automatically.
+
+If UFW is enabled, run `sudo ufw allow syncthing` to allow [device discovery and
+synchronization][firewall].
+
+The plugin supports Omarchy on Linux x86_64 and aarch64, including Apple Silicon
+M1/M2 Macs running Omarchy (stable). Alpha adapters for DankMaterialShell,
+Illogical Impulse, Caelestia, and Waybar are under development; they are not
+officially released and WIP, but can be tested via manual installation on those
+systems: see the `hosts/...` in the source. Daemon mode remains future work.
+
+## File activity
+
+The plugin reports only state exposed by Syncthing:
+
+- Blue identifies synchronization or an indexed addition.
+- Red identifies an indexed entry with `deleted=true`.
+- Green identifies remote download progress, which is an upload from this
+  device.
+
+Syncthing does not expose a reliable source-to-destination relationship for a
+rename or move, so the plugin does not guess one from nearby additions and
+deletions.
+
+## Keybindings
+
+Also shown in the panel footer.
+
+| Key     | Action                    |
+| ------- | ------------------------- |
+| `r`     | rescan all folders        |
+| `w`     | open the Web UI           |
+| `p`     | start or stop the service |
+| `s`     | open plugin settings      |
+| `q/esc` | close the panel           |
+
+## Settings
+
+Settings opens `~/.config/omarchy/ilyazar.syncthing/settings.toml` in your
+editor. Saves are validated; invalid edits show an error and leave the session's
+last valid settings active.
+
+Older settings offer **Auto-port**, **Manual port** and **Cancel**. Auto-port
+previews the migration to schema `2`, preserves valid preferences and comments,
+and keeps an exact backup beside the original. Unrecognized or invalid settings
+need manual correction.
+
+- `style.icon_style = "themed"` follows the bar foreground. Use `"branded"` for
+  the classic Syncthing icon.
+- `style.web_ui_theme = "default"` uses Syncthing's own Web UI.
+- `style.web_ui_theme = "modern"` uses the bundled Syncshell Web UI.
+- `style.web_ui_theme = "omarchy"` applies the Omarchy palette to that same UI.
+  This is the default.
+
+Omarchy theme changes apply live. Reload the page when switching Web UI
+profiles; `modern` keeps its own appearance.
+
+## New Web UI
+
+The web UI is independently developed as a self-contained interface under
+[syncshell-webui](https://github.com/syncshell/syncshell-webui/). A bundled
+version is shipped with this plugin. It keeps Syncthing's API and adds a modern
+look and cosmetic changes over the classical interface:
+
+- **Clearer layout:** folders, this device and remote devices sit alongside each
+  other on wide screens and stack on smaller ones. Current activity stays
+  visible; configuration and identification details fold away. Compact counts
+  and icon tooltips keep the cards readable.
+- **Resolve sync conflicts (beta):** the second tab lists conflict files from
+  Syncthing's index, with folder and global rechecks. File links open the
+  containing folder in your default file manager. Autoresolve restores a
+  conflict file's original name when that name is absent, preserving contents.
+- **Notifications:** a separate tab shows pending messages. Its dot follows the
+  highest severity and disappears when all messages are resolved.
+- **Smaller frontend:** The low-overhead and minimalist
+  [Preact](https://github.com/preactjs/preact) replaces
+  [AngularJS, whose support ended in 2022](https://angularjs.org/) and removes
+  most of the old JavaScript widget libraries.
+
+Compared with the default Web UI shipped with
+[Syncthing v2.1.3](https://github.com/syncthing/syncthing/releases/tag/v2.1.3):
+
+| Measure                        | Syncthing v2.1.3 | Syncshell | Reduction |
+| ------------------------------ | ---------------- | --------- | --------- |
+| Application source (LOC)       | 8,296            | 4,299     | 48%       |
+| Readable source + vendor (LOC) | 53,096           | 9,885     | 81%       |
+| HTML/CSS/JS assets             | 2.79 MB          | 0.33 MB   | 88%       |
+| Whole Web UI assets            | 6.58 MB          | 0.48 MB   | 93%       |
+
+Three Syncshell views in Nord, followed by Syncthing's default UI. The file
+review is in beta, but should work more or less.
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h4>Overview (Nord theme)</h4>
+      <a href="assets/webui-nord-overview.png">
+        <img src="assets/webui-nord-overview.png" width="100%"
+          alt="Syncshell folders and devices in three columns under Nord">
+      </a>
+    </td>
+    <td width="50%" valign="top">
+      <h4>Notifications (Nord theme)</h4>
+      <a href="assets/webui-nord-notifications.png">
+        <img src="assets/webui-nord-notifications.png" width="100%"
+          alt="Syncshell notifications in their own tab under Nord">
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h4>Conflict review (Nord theme)</h4>
+      <a href="assets/webui-nord-conflicts.png">
+        <img src="assets/webui-nord-conflicts.png" width="100%"
+          alt="Example current and conflict files with recheck and rename actions">
+      </a>
+    </td>
+    <td width="50%" valign="top">
+      <h4>Default Syncthing UI</h4>
+      <a href="assets/webui-syncthing-default.png">
+        <img src="assets/webui-syncthing-default.png" width="100%"
+          alt="Syncthing's original layout with expanded folder details">
+      </a>
+    </td>
+  </tr>
+</table>
+
+Open the UI through the plugin's **Web UI** button to enable local file opening
+and renaming. These actions require Syncthing and the desktop to run as the same
+user. Containers, tunnels, relative paths and symlinked paths are unsupported
+for file actions; permission errors leave files unchanged. Discovery and
+rechecks remain available without desktop access. Reopen through the plugin
+after its core restarts.
+
+For issue submission regarding the new web UI please refer to its GitHub repo
+issue section under
+[issues](https://github.com/syncshell/syncshell-webui/issues) (licensing details
+are recorded in [Syncshell Web provenance][webui-provenance]).
+
+## Manage folders and devices from the panel
+
+- The **link/unlink icon** resumes or pauses a folder without changing its path
+  or sharing.
+- **FORGET** removes an unlinked folder's configuration, keeping its files.
+- **+** adds a local folder with a generated Folder ID. Missing directories
+  require confirmation; overlapping paths are rejected. Select devices to share
+  with, or leave it local only.
+- Under **Folders**, use the **share icon** to choose the selected folder's
+  devices.
+- Under **Devices**, use the **folder icon** to review or remove existing
+  shares.
+
+Incoming unencrypted folder offers can fill in the setup form for you. Shared
+folders need the same Folder ID on every device, so accept an offer rather than
+generate a new ID. For encrypted sharing, untrusted devices, or more advanced
+options, use the Web UI. See Syncthing's
+[folder guide](https://docs.syncthing.net/intro/gui.html) for more on setting up
+shared folders.
+
+## Shell support
+
+| Shell             | Status  | Release plan           |
+| ----------------- | ------- | ---------------------- |
+| Omarchy           | Stable  | stable since 0.1.0     |
+| DankMaterialShell | Alpha   | beta planned for 0.2.3 |
+| Illogical Impulse | Alpha   | beta planned for 0.2.4 |
+| Caelestia         | Alpha   | beta planned for 0.2.5 |
+| Waybar            | Alpha   | beta planned for 0.2.6 |
+| Ambxst            | Planned | TBD                    |
+| iNiR              | Planned | TBD                    |
+
+## Roadmap and prior releases
+
+See [CHANGELOG.md](CHANGELOG.md) for details.
+
+| Release | Date       | What changed                                            |
+| ------- | ---------- | ------------------------------------------------------- |
+| Future  | TBD        | mature alpha DMS, II, Caelestia, and Waybar adapters    |
+| 0.2.2   | 2026-10-06 | secure pending-device dismissal confirmations           |
+| 0.2.1   | 2026-10-05 | render pending device names as plain text in adapters   |
+| 0.2.0   | 2026-10-05 | improve multi-folder navigation, search, and filtering  |
+|         |            | bundle Web UI 0.1.4 with improved theme handling        |
+|         |            | support Apple Silicon Macs running Omarchy Linux        |
+|         |            | add anchored side forms and keyboard navigation         |
+|         |            | clarify statuses and restore bar hover tooltips         |
+|         |            | refresh the preview and all four demo videos            |
+| 0.1.9   | 2026-09-21 | add remote-device setup and folder-sharing controls     |
+|         |            | confirm directory creation and folder/device removal    |
+|         |            | fix remote counts and keep rescan controls consistent   |
+|         |            | refine dropdowns, status, and installation feedback     |
+|         |            | allow plugin removal while Syncthing is unavailable     |
+| 0.1.8   | 2026-09-13 | use one native core for the Omarchy panel               |
+|         |            | support healthy externally managed Syncthing instances  |
+|         |            | add the Preact Web UI and settings migration            |
+|         |            | add conflict review (beta) and guarded file renaming    |
+|         |            | improve error details, rescan feedback and recovery     |
+|         |            | fix themed icon contrast, scaling and Web UI branding   |
+| 0.1.7   | 2026-08-31 | fix persistent service-state reconciliation             |
+|         |            | UI/UX: clear semantics on buttons, harmonize font size  |
+| 0.1.6   | 2026-08-22 | make live and indexed file activity accurate            |
+|         |            | refine folder lifecycle controls and pending offers     |
+|         |            | add versioned icon and live Web UI theme settings       |
+|         |            | refresh the preview and add four focused demo videos    |
+| 0.1.5   | 2026-08-20 | add an optional theme-colored bar icon                  |
+| 0.1.4   | 2026-08-16 | support TLS-enabled local Syncthing APIs                |
+| 0.1.3   | 2026-08-15 | add a demo video and improve the documentation          |
+| 0.1.2   | 2026-08-15 | manage Syncthing folders from the bar panel             |
+| 0.1.1   | 2026-08-14 | monitor installs and show live synchronization activity |
+| 0.1.0   | 2026-08-12 | first release                                           |
+
+## Upgrade
+
+Update through Omarchy, then restart the shell to load the updated plugin:
+
+```bash
+omarchy plugin update io.github.ilyazar.syncthing
+omarchy-restart-shell
+```
+
+Restart the shell after updating; the retained old service may otherwise fail.
+
+## Remove
+
+Select **Cleanly remove Syncthing plugin** in settings. You can keep or delete
+plugin settings. When Syncthing is reachable, both choices restore its default
+UI and remove the custom Web UI profiles. Otherwise those profiles are retained
+so removal never guesses their location. Syncthing itself, its configuration and
+synced files remain intact.
+
+To uninstall Syncthing separately:
+
+```bash
+systemctl --user disable --now syncthing.service
+omarchy pkg drop syncthing
+```
+
+These commands leave Syncthing configuration and synchronized files intact.
+
+## Security and license
+
+The plugin runs as unsandboxed code under your desktop user. The Go core keeps
+the Syncthing API key out of QML and plugin settings; that key permits changes
+to Syncthing's configuration. File actions use your existing permissions.
+
+Plugin code is MIT licensed. The Web UI and adapted icons retain Syncthing's
+MPL-2.0 attribution and vendor licenses; see [Web UI
+provenance][webui-provenance] and [icon sources](assets/LICENSE.md). The Go
+runtime and system-call dependency use the
+[BSD license](packaging/bundled/LICENSE.golang).
+
+[webui-provenance]:
+  https://github.com/syncshell/syncshell-webui/blob/main/UPSTREAM.md
+[firewall]:
+  https://docs.syncthing.net/users/firewall.html#uncomplicated-firewall-ufw
