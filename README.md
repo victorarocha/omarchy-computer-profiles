@@ -15,6 +15,10 @@ I created OCP because I use Omarchy to revive my old Mac Pro 2013—the
 with the world and give everyone a tool to share their own working Omarchy
 configurations for their specific hardware.
 
+![My Omarchy desktop running on a Mac Pro 2013](screenshot-2026-10-11_21-57-55.png)
+
+*My current Omarchy desktop on the Mac Pro 2013 "trashcan".*
+
 Pull requests are welcome! Contribute profiles for more computer models or help
 improve OCP. See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
