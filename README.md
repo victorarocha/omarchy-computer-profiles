@@ -1,5 +1,11 @@
 # Omarchy Computer Profiles (OCP)
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="ocp_logo_darktheme.png">
+  <source media="(prefers-color-scheme: light)" srcset="ocp_logo_lighttheme.png">
+  <img alt="Omarchy Computer Profiles logo" src="ocp_logo_lighttheme.png" width="480">
+</picture>
+
 Share working [Omarchy](https://omarchy.org/) configurations by computer model. OCP helps individuals
 keep older hardware useful and helps companies build a reviewed catalogue of
 profiles for their fleets.
