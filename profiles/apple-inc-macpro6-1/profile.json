@@ -1230,12 +1230,6 @@
     },
     {
       "scope": "home",
-      "path": ".config/omarchy/plugins/a-weather-app.weather/.gitignore",
-      "sha256": "c95d9fee737e18fe940273fa292e1b85d18b1e20f51487e822cf1a4fa7a21de3",
-      "mode": 420
-    },
-    {
-      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/.qmlformat.ini",
       "sha256": "c7edc6bb32c3c24a790649613842a5d04139c4b9c73db1ab3537965cc0f2f94e",
       "mode": 420
@@ -2982,12 +2976,6 @@
     },
     {
       "scope": "home",
-      "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/.gitignore",
-      "sha256": "9b93491b525592f3e698897915063413d1bea728592663dbe62f30e644e4fdb1",
-      "mode": 420
-    },
-    {
-      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/Makefile",
       "sha256": "6c8e991076f80bae129d7836005db79b5297a2f9354100dae87801780f97e3c9",
       "mode": 420
@@ -3768,12 +3756,6 @@
     },
     {
       "scope": "home",
-      "path": ".config/omarchy/plugins/io.github.brukb.omarchy-zerotier/.gitignore",
-      "sha256": "7767510519934d2a0165f580abc41a128a4194efc183c4459e883d65716320aa",
-      "mode": 420
-    },
-    {
-      "scope": "home",
       "path": ".config/omarchy/plugins/io.github.brukb.omarchy-zerotier/BarWidget.qml",
       "sha256": "e70aaa4e0aa75da821e82c92fe6bd35d7253aa54c8e4365d64d7e8325d2c565e",
       "mode": 420
@@ -3948,12 +3930,6 @@
     },
     {
       "scope": "home",
-      "path": ".config/omarchy/plugins/io.github.chrisandtre.bing-wallpaper/.gitignore",
-      "sha256": "75739a2b7bc562cb6ffed7412eb9d8bd28be3d75819429812cd3d976d5f9d3d8",
-      "mode": 420
-    },
-    {
-      "scope": "home",
       "path": ".config/omarchy/plugins/io.github.chrisandtre.bing-wallpaper/BarWidget.qml",
       "sha256": "1289390be30fec16ab45c1fa6781af2419520d3d3b6b05f41a5f74337b45a85b",
       "mode": 420
@@ -4064,18 +4040,6 @@
       "scope": "home",
       "path": ".config/omarchy/plugins/io.github.chrisandtre.bing-wallpaper/preview.png",
       "sha256": "26746781f184d2521889c1c621b0be684c2e492939f28999426750913a0d90f1",
-      "mode": 420
-    },
-    {
-      "scope": "home",
-      "path": ".config/omarchy/plugins/io.github.ilyazar.syncthing/.gitattributes",
-      "sha256": "6abacfcba2155e3e1dfe5a3057b980b815c2b0a2fdd8012f758359e66d338ab6",
-      "mode": 420
-    },
-    {
-      "scope": "home",
-      "path": ".config/omarchy/plugins/io.github.ilyazar.syncthing/.gitignore",
-      "sha256": "3e8dc492ed43e4339a7996ba0941f08123e7212fc10a07b3aa3f20dbcd58ddb1",
       "mode": 420
     },
     {
@@ -5340,12 +5304,6 @@
     },
     {
       "scope": "home",
-      "path": ".config/omarchy/plugins/io.github.sirjul1337.lock-explorer/.gitignore",
-      "sha256": "050129b500cb57e714427d19a9e4ab2fc801f3cd38f24b44255055f451c11465",
-      "mode": 420
-    },
-    {
-      "scope": "home",
       "path": ".config/omarchy/plugins/io.github.sirjul1337.lock-explorer/.shellcheckrc",
       "sha256": "a3a8c34b7d1806452be66feac2d5944dda436e917cef422d0f06668b40e5d2cb",
       "mode": 420
@@ -6588,12 +6546,6 @@
     },
     {
       "scope": "home",
-      "path": ".config/omarchy/plugins/jankeesvw.text-transform/.gitignore",
-      "sha256": "d86f319b1145615c4bb75b63e5dc7c97a27a1de1b8560f1f717e704226663207",
-      "mode": 420
-    },
-    {
-      "scope": "home",
       "path": ".config/omarchy/plugins/jankeesvw.text-transform/LICENSE",
       "sha256": "1e09e82e2401b75ac9385bb5581112ec89bba2eae939acf44c7461f4d451f58c",
       "mode": 420
@@ -6638,12 +6590,6 @@
       "scope": "home",
       "path": ".config/omarchy/plugins/jankeesvw.text-transform/screenshots/panel.png",
       "sha256": "db5ed841c2d13f72c7b9d11da87bcceaa6a7b4f8541454b359f68fa1bcaa37c0",
-      "mode": 420
-    },
-    {
-      "scope": "home",
-      "path": ".config/omarchy/plugins/lutfi.glass/.gitignore",
-      "sha256": "60c9bdd905fcf45ac485c680d32e9773962cf061b6f041dcddd033911558a672",
       "mode": 420
     },
     {
@@ -6776,12 +6722,6 @@
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/.codex/prompts/review-prs.md",
       "sha256": "cc24d3058a70d7f3c8894f648704551426606e4468412f94d4f2df4803c1c8d3",
-      "mode": 420
-    },
-    {
-      "scope": "home",
-      "path": ".config/omarchy/plugins/omamail/.gitignore",
-      "sha256": "c820b89e5760c62b4f94834014e0452468796703849250d28409dc2cb6380ed4",
       "mode": 420
     },
     {
@@ -10053,12 +9993,6 @@
       "path": ".config/omarchy/plugins/omamail/ui/settings/Appearance.js",
       "sha256": "9f4d669dbc19d750a6fa3c6bb49e05a7dd8a64e51e0b2a637d860eb6a0c96ff1",
       "mode": 420
-    },
-    {
-      "scope": "home",
-      "path": ".config/omarchy/plugins/omaplug/.gitignore",
-      "sha256": "20df34d58dac9fdd91a0a5751a3ba5109a6344fd7e34f3f643e043fd5649c3b6",
-      "mode": 384
     },
     {
       "scope": "home",

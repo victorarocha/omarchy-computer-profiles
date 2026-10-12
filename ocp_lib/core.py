@@ -195,6 +195,8 @@ def capture_plugins(folder, entries, home, shell, warnings):
         skipped=[]
         for source in sorted(sources):
             relative=source.relative_to(resolved)
+            # Upstream ignore rules must not hide captured payloads from OCP's Git repository.
+            if source.name in {'.gitignore','.gitattributes'}: continue
             if any(part in {'tests','testdata','__tests__','.github'} for part in relative.parts): continue
             if not source.exists(): continue
             asset=source.suffix.lower() in ASSET_SUFFIXES or source.read_bytes()[:4]==b'\x7fELF'
