@@ -1,12 +1,21 @@
 # Omarchy Computer Profiles (OCP)
 
-Share working Omarchy configurations by computer model. OCP helps individuals
+Share working [Omarchy](https://omarchy.org/) configurations by computer model. OCP helps individuals
 keep older hardware useful and helps companies build a reviewed catalogue of
 profiles for their fleets.
 
+I created OCP because I use Omarchy to revive my old Mac Pro 2013—the
+"trashcan"—and it is working really well. I wanted to share my configuration
+with the world and give everyone a tool to share their own working Omarchy
+configurations for their specific hardware.
+
+Pull requests are welcome! Contribute profiles for more computer models or help
+improve OCP. See [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
+
 A profile records hardware compatibility, portable Limine kernel options,
 selected driver configuration, enabled user plugins, and a common software set:
-**ZapFast, brumm, Flatpak, Bruno, Google Chrome and Obsidian**.
+**[ZapFast](https://zapfast.rocks/), [brumm](https://github.com/chriopter/brumm),
+Flatpak, [Bruno](https://www.usebruno.com/), Google Chrome and Obsidian**.
 
 OCP configures an **existing, bootable Omarchy installation**. It does not install
 the operating system, partition disks, or copy another machine's encryption keys.
