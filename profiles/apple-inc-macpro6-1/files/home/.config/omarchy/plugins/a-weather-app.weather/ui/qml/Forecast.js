@@ -433,35 +433,35 @@ function warningDetail(v) {
 }
 function warningStatus(v, available) {
     if (!available)
-        return "Monitoring unavailable · weather service disconnected";
+        return qsTranslate("App", "Monitoring unavailable · weather service disconnected");
     if (v.state === "unavailable")
         return ({
-                delivery_unavailable: "Monitoring unavailable · desktop notification service is not ready",
-                delivery_unsupported: "Monitoring unavailable · native delivery is not supported",
-                target_unavailable: "Monitoring unavailable · connect and resolve the primary place",
-                not_supported_here: "Official warning monitoring is available for US places",
-                stale_feed: "Monitoring unavailable · warning data is stale",
-                incomplete_history: "Monitoring unavailable · warning history is incomplete",
-                capacity_reached: "Monitoring unavailable · warning history capacity reached",
-                save_unconfirmed: "Monitoring unavailable · saving could not be confirmed",
-                state_unavailable: "Monitoring unavailable · saved settings could not be read",
-                ledger_unavailable: "Monitoring unavailable · warning history could not be opened",
-                clock_changed: "Monitoring unavailable · the clock changed; waiting for fresh data"
-            })[v.reason] || "Monitoring unavailable · a complete warning check could not be confirmed";
+                delivery_unavailable: qsTranslate("App", "Monitoring unavailable · desktop notification service is not ready"),
+                delivery_unsupported: qsTranslate("App", "Monitoring unavailable · native delivery is not supported"),
+                target_unavailable: qsTranslate("App", "Monitoring unavailable · connect and resolve the primary place"),
+                not_supported_here: qsTranslate("App", "Official warning monitoring is available for US places"),
+                stale_feed: qsTranslate("App", "Monitoring unavailable · warning data is stale"),
+                incomplete_history: qsTranslate("App", "Monitoring unavailable · warning history is incomplete"),
+                capacity_reached: qsTranslate("App", "Monitoring unavailable · warning history capacity reached"),
+                save_unconfirmed: qsTranslate("App", "Monitoring unavailable · saving could not be confirmed"),
+                state_unavailable: qsTranslate("App", "Monitoring unavailable · saved settings could not be read"),
+                ledger_unavailable: qsTranslate("App", "Monitoring unavailable · warning history could not be opened"),
+                clock_changed: qsTranslate("App", "Monitoring unavailable · the clock changed; waiting for fresh data")
+            })[v.reason] || qsTranslate("App", "Monitoring unavailable · a complete warning check could not be confirmed");
     return ({
-            off: "Official warning monitoring is off",
-            waiting: "Waiting for a complete, fresh warning check",
-            watching: "Monitoring official NWS warnings",
-            quiet: v.settings.urgent_override ? "Quiet hours · urgent overrides are enabled" : "Quiet hours · warning delivery is paused",
-            paused: "Warning delivery paused · monitoring continues"
+            off: qsTranslate("App", "Official warning monitoring is off"),
+            waiting: qsTranslate("App", "Waiting for a complete, fresh warning check"),
+            watching: qsTranslate("App", "Monitoring official NWS warnings"),
+            quiet: v.settings.urgent_override ? qsTranslate("App", "Quiet hours · urgent overrides are enabled") : qsTranslate("App", "Quiet hours · warning delivery is paused"),
+            paused: qsTranslate("App", "Warning delivery paused · monitoring continues")
         })[v.state];
 }
 function warningDeliveryLabel(status) {
     return ({
-            pending: "Sending…",
-            sent: "Accepted by desktop",
-            failed: "Not sent",
-            uncertain: "Delivery unconfirmed"
+            pending: qsTranslate("App", "Sending…"),
+            sent: qsTranslate("App", "Accepted by desktop"),
+            failed: qsTranslate("App", "Not sent"),
+            uncertain: qsTranslate("App", "Delivery unconfirmed")
         })[status] || "";
 }
 const aqAttribution = "CAMS global model data via Open-Meteo (CC BY 4.0)";
@@ -589,81 +589,125 @@ function weatherMap(v) {
 // The detail view shares one selected chart across these existing hourly fields.
 const metricChoices = [
     {
-        label: "Temperature",
+        get label() {
+            return qsTranslate("App", "Temperature");
+        },
         value: "temperature_c",
         format: "temperature",
         zero: false,
-        explanation: "Forecast air temperature at the selected time."
+        get explanation() {
+            return qsTranslate("App", "Forecast air temperature at the selected time.");
+        }
     },
     {
-        label: "Feels like",
+        get label() {
+            return qsTranslate("App", "Feels like");
+        },
         value: "apparent_temperature_c",
         format: "temperature",
         zero: false,
-        explanation: "Modeled apparent temperature accounts for conditions such as wind and humidity."
+        get explanation() {
+            return qsTranslate("App", "Modeled apparent temperature accounts for conditions such as wind and humidity.");
+        }
     },
     {
-        label: "Precipitation chance",
+        get label() {
+            return qsTranslate("App", "Precipitation chance");
+        },
         value: "precipitation_probability",
         format: "percent",
         zero: true,
-        explanation: "Chance of precipitation during the hour ending at each time. Probability is different from the amount that may fall."
+        get explanation() {
+            return qsTranslate("App", "Chance of precipitation during the hour ending at each time. Probability is different from the amount that may fall.");
+        }
     },
     {
-        label: "Precipitation amount",
+        get label() {
+            return qsTranslate("App", "Precipitation amount");
+        },
         value: "precipitation_rate_mm_hr",
         format: "amount",
         zero: true,
-        explanation: "Precipitation total for the hour ending at each time. Missing values do not mean dry weather."
+        get explanation() {
+            return qsTranslate("App", "Precipitation total for the hour ending at each time. Missing values do not mean dry weather.");
+        }
     },
     {
-        label: "Wind",
+        get label() {
+            return qsTranslate("App", "Wind");
+        },
         value: "wind_speed_m_s",
         format: "wind",
         zero: true,
-        explanation: "Forecast sustained wind speed at the selected time."
+        get explanation() {
+            return qsTranslate("App", "Forecast sustained wind speed at the selected time.");
+        }
     },
     {
-        label: "Gusts",
+        get label() {
+            return qsTranslate("App", "Gusts");
+        },
         value: "wind_gust_m_s",
         format: "wind",
         zero: true,
-        explanation: "Forecast gust speed. Gusts represent brief peaks rather than sustained wind."
+        get explanation() {
+            return qsTranslate("App", "Forecast gust speed. Gusts represent brief peaks rather than sustained wind.");
+        }
     },
     {
-        label: "Humidity",
+        get label() {
+            return qsTranslate("App", "Humidity");
+        },
         value: "humidity",
         format: "percent",
         zero: true,
-        explanation: "Relative humidity describes how close the air is to saturation at its temperature."
+        get explanation() {
+            return qsTranslate("App", "Relative humidity describes how close the air is to saturation at its temperature.");
+        }
     },
     {
-        label: "Dew point",
+        get label() {
+            return qsTranslate("App", "Dew point");
+        },
         value: "dew_point_c",
         format: "temperature",
         zero: false,
-        explanation: "The temperature at which the air would become saturated if cooled."
+        get explanation() {
+            return qsTranslate("App", "The temperature at which the air would become saturated if cooled.");
+        }
     },
     {
-        label: "Visibility",
+        get label() {
+            return qsTranslate("App", "Visibility");
+        },
         value: "visibility_m",
         format: "distance",
         zero: true,
-        explanation: "Modeled horizontal visibility. Local conditions can vary from the model."
+        get explanation() {
+            return qsTranslate("App", "Modeled horizontal visibility. Local conditions can vary from the model.");
+        }
     },
     {
-        label: "UV index",
+        get label() {
+            return qsTranslate("App", "UV index");
+        },
         value: "uv_index",
         format: "uv",
         zero: true,
-        explanation: "Hourly ultraviolet index from the forecast model. The index has no units."
+        get explanation() {
+            return qsTranslate("App", "Hourly ultraviolet index from the forecast model. The index has no units.");
+        }
     },
     {
-        label: "Pressure",
+        get label() {
+            return qsTranslate("App", "Pressure");
+        },
         value: "pressure_msl_hpa",
         format: "pressure",
         zero: false,
-        explanation: "Atmospheric pressure adjusted to mean sea level, allowing comparison across elevations."
+        get explanation() {
+            return qsTranslate("App", "Atmospheric pressure adjusted to mean sea level, allowing comparison across elevations.");
+        }
     }
 ];
 function metricInfo(metric) {
@@ -703,8 +747,8 @@ function metricScale(hours, metric) {
 function metricRange(hours, metric, units, windUnits) {
     const range = metricScale(hours, metric);
     if (!range)
-        return "No values available in this period.";
-    return "Available hourly range: " + metricValue(range.minimum, metric, units, windUnits) + " – " + metricValue(range.maximum, metric, units, windUnits) + (range.count < hours.length ? ". Some hours are unavailable." : ".");
+        return qsTranslate("App", "No values available in this period.");
+    return (range.count < hours.length ? qsTranslate("App", "Available hourly range: %1 – %2. Some hours are unavailable.") : qsTranslate("App", "Available hourly range: %1 – %2.")).arg(metricValue(range.minimum, metric, units, windUnits)).arg(metricValue(range.maximum, metric, units, windUnits));
 }
 function briefings(value) {
     if (value === undefined)
@@ -747,20 +791,20 @@ function briefings(value) {
 }
 function briefingText(row, units, windUnits) {
     if (!row || (row.low_c === null && row.peak_probability === null && row.gust_m_s === null))
-        return "Hourly outlook unavailable.";
+        return qsTranslate("App", "Hourly outlook unavailable.");
     let parts = [];
     if (row.low_c !== null)
-        parts.push("Hourly temperatures " + temp(row.low_c, units) + "–" + temp(row.high_c, units) + ".");
+        parts.push(qsTranslate("App", "Hourly temperatures %1–%2.").arg(temp(row.low_c, units)).arg(temp(row.high_c, units)));
     if (row.peak_probability !== null) {
         if (row.precipitation_complete && row.peak_probability < 0.2)
-            parts.push("Low precipitation chances.");
+            parts.push(qsTranslate("App", "Low precipitation chances."));
         else
-            parts.push((row.precipitation_complete ? "Precipitation chance peaks at " : "Available precipitation chances reach ") + percent(row.peak_probability) + " (" + row.peak_label + ").");
+            parts.push((row.precipitation_complete ? qsTranslate("App", "Precipitation chance peaks at %1 (%2).") : qsTranslate("App", "Available precipitation chances reach %1 (%2).")).arg(percent(row.peak_probability)).arg(row.peak_label));
     }
     if (row.gust_m_s !== null && row.gust_m_s >= 8)
-        parts.push("Gusts up to " + wind(row.gust_m_s, units, windUnits) + ".");
+        parts.push(qsTranslate("App", "Gusts up to %1.").arg(wind(row.gust_m_s, units, windUnits)));
     if (!row.temperature_complete || !row.precipitation_complete || !row.wind_complete)
-        parts.push("Partial hourly forecast.");
+        parts.push(qsTranslate("App", "Partial hourly forecast."));
     return parts.join(" ");
 }
 function savedLocations(v) {
@@ -838,7 +882,7 @@ var savedRegionCodes = {
 };
 function savedPlaceName(row) {
     if (!row)
-        return "Location unavailable";
+        return qsTranslate("App", "Location unavailable");
     const name = row.name;
     if (row.mode === "custom")
         return name;
@@ -860,30 +904,30 @@ function savedPlaceName(row) {
     return row.mode === "place" && parts.length > 3 ? [parts[0], parts[1], parts[parts.length - 1]].join(", ") : name;
 }
 function savedName(row) {
-    return row ? row.label || savedPlaceName(row) : "Location unavailable";
+    return row ? row.label || savedPlaceName(row) : qsTranslate("App", "Location unavailable");
 }
 function savedUnits(row, controls) {
     return controls.units_mode === "auto" ? (row.country_code === null || row.country_code === "US" ? "F" : "C") : controls.units;
 }
 function savedAlertText(row) {
     return row && row.summary ? ({
-            active: "NWS alert in saved feed",
-            cached: "Cached NWS alert",
-            none: "No active alerts in saved NWS feed",
-            unavailable: "Alert status unavailable",
-            not_supported_here: "Official alerts not supported here"
-        })[row.summary.alert_status] : "Alert status unavailable";
+            active: qsTranslate("App", "NWS alert in saved feed"),
+            cached: qsTranslate("App", "Cached NWS alert"),
+            none: qsTranslate("App", "No active alerts in saved NWS feed"),
+            unavailable: qsTranslate("App", "Alert status unavailable"),
+            not_supported_here: qsTranslate("App", "Official alerts not supported here")
+        })[row.summary.alert_status] : qsTranslate("App", "Alert status unavailable");
 }
 function locationErrorText(error) {
     return ({
-            lookup_failed: "Location lookup failed. Try again.",
-            zip_not_found: "ZIP code not found. Check the code and try again.",
-            zip_ambiguous: "This ZIP code matches more than one location. Try another code.",
-            place_not_found: "Selected city is no longer available. Search again.",
-            stale_selection: "Search result expired. Search again.",
-            timeout: "Location lookup timed out. Try again.",
-            state_io_failed: "Location could not be saved. Try again.",
-            save_unconfirmed: "Location changed, but saving could not be confirmed. Try again."
+            lookup_failed: qsTranslate("App", "Location lookup failed. Try again."),
+            zip_not_found: qsTranslate("App", "ZIP code not found. Check the code and try again."),
+            zip_ambiguous: qsTranslate("App", "This ZIP code matches more than one location. Try another code."),
+            place_not_found: qsTranslate("App", "Selected city is no longer available. Search again."),
+            stale_selection: qsTranslate("App", "Search result expired. Search again."),
+            timeout: qsTranslate("App", "Location lookup timed out. Try again."),
+            state_io_failed: qsTranslate("App", "Location could not be saved. Try again."),
+            save_unconfirmed: qsTranslate("App", "Location changed, but saving could not be confirmed. Try again.")
         })[error] || "";
 }
 function appearance(v) {
@@ -1025,6 +1069,7 @@ function snapshot(v) {
     if (v.launcher_status !== undefined && ["ready", "installed", "conflict", "failed", "unsupported_path"].indexOf(v.launcher_status) < 0)
         throw Error("Invalid launcher status");
     return {
+        language: languageState(v.language),
         dashboard: Dashboard.state(v.dashboard),
         appearance: appearance(v.appearance),
         update: updateStatus(v.update),
@@ -1067,35 +1112,37 @@ function snapshot(v) {
     };
 }
 function temp(v, units) {
-    return v === null || v === undefined ? "—" : Math.round(units === "F" ? v * 9 / 5 + 32 : v) + "°";
+    return v === null || v === undefined ? "—" : displayNumber(Math.round(units === "F" ? v * 9 / 5 + 32 : v), 0) + "°";
 }
 function uv(v) {
-    return v === null || v === undefined ? "—" : v.toFixed(1);
+    return v === null || v === undefined ? "—" : displayNumber(v, 1);
 }
 function pressure(v, units) {
-    return v === null || v === undefined ? "—" : units === "F" ? (v / 33.8638866667).toFixed(2) + " inHg" : Math.round(v) + " hPa";
+    return v === null || v === undefined ? "—" : units === "F" ? displayNumber(v / 33.8638866667, 2) + " inHg" : displayNumber(Math.round(v), 0) + " hPa";
 }
 function title(v) {
     return ({
-            clear: "Clear",
-            partly_cloudy: "Partly cloudy",
-            cloudy: "Cloudy",
-            fog: "Fog",
-            drizzle: "Drizzle",
-            rain: "Rain",
-            snow: "Snow",
-            sleet: "Sleet",
-            thunderstorm: "Thunderstorm",
-            unknown: "Unavailable"
-        })[v] || "Unavailable";
+            clear: qsTranslate("App", "Clear"),
+            partly_cloudy: qsTranslate("App", "Partly cloudy"),
+            cloudy: qsTranslate("App", "Cloudy"),
+            fog: qsTranslate("App", "Fog"),
+            drizzle: qsTranslate("App", "Drizzle"),
+            rain: qsTranslate("App", "Rain"),
+            snow: qsTranslate("App", "Snow"),
+            sleet: qsTranslate("App", "Sleet"),
+            thunderstorm: qsTranslate("App", "Thunderstorm"),
+            unknown: qsTranslate("App", "Unavailable")
+        })[v] || qsTranslate("App", "Unavailable");
 }
 function percent(v) {
-    return v === null || v === undefined ? "—" : Math.round(v * 100) + "%";
+    return v === null || v === undefined ? "—" : displayNumber(Math.round(v * 100), 0) + "%";
 }
 function localTime(v, tz, kind) {
     if (!v)
         return "—";
     try {
+        if (typeof weatherFormatDate === "function")
+            return weatherFormatDate(v, tz, kind);
         return new Date(v).toLocaleString("en-US", {
             timeZone: tz,
             hour: "numeric",
@@ -1103,7 +1150,7 @@ function localTime(v, tz, kind) {
             hour12: true
         });
     } catch (e) {
-        return "Time unavailable";
+        return qsTranslate("App", "Time unavailable");
     }
 }
 function windUnit(units, preference) {
@@ -1119,35 +1166,35 @@ function wind(v, units, preference) {
             "m/s": 1,
             kn: 3600 / 1852
         })[unit];
-    return (unit === "m/s" ? value.toFixed(1) : Math.round(value)) + " " + unit;
+    return displayNumber(value, unit === "m/s" ? 1 : 0) + " " + unit;
 }
 function distance(v, units) {
-    return v === null || v === undefined ? "—" : (v / (units === "F" ? 1609.344 : 1000)).toFixed(1) + (units === "F" ? " mi" : " km");
+    return v === null || v === undefined ? "—" : displayNumber(v / (units === "F" ? 1609.344 : 1000), 1) + (units === "F" ? " mi" : " km");
 }
 function direction(v) {
-    return v === null || v === undefined ? "" : ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][Math.round(v / 45) % 8];
+    return v === null || v === undefined ? "" : [qsTranslate("App", "N"), qsTranslate("App", "NE"), qsTranslate("App", "E"), qsTranslate("App", "SE"), qsTranslate("App", "S"), qsTranslate("App", "SW"), qsTranslate("App", "W"), qsTranslate("App", "NW")][Math.round(v / 45) % 8];
 }
 function amount(v, units) {
-    return v === null || v === undefined ? "—" : (units === "F" ? (v / 25.4).toFixed(2) + " in" : v.toFixed(1) + " mm");
+    return v === null || v === undefined ? "—" : (units === "F" ? displayNumber(v / 25.4, 2) + " in" : displayNumber(v, 1) + " mm");
 }
 function outlook(hours, units, windUnits) {
     // Describe the available hourly model, never invent minute-level onset or
     // turn missing probability into a dry-weather promise.
     const next = hours.slice(0, 6);
     if (!next.length)
-        return "Hourly outlook unavailable.";
+        return qsTranslate("App", "Hourly outlook unavailable.");
     const known = next.filter(h => h.precipitation_probability !== null && h.precipitation_probability !== undefined);
     let parts = [];
     if (known.length === next.length) {
         const peak = known.reduce((a, b) => a.precipitation_probability >= b.precipitation_probability ? a : b);
-        parts.push(peak.precipitation_probability < 0.2 ? "Low precipitation chances in the next " + next.length + " hourly forecasts." : "Precipitation chance peaks at " + percent(peak.precipitation_probability) + " around " + peak.local_hour + ".");
+        parts.push(peak.precipitation_probability < 0.2 ? qsTranslate("App", "Low precipitation chances in the next %n hourly forecast(s).", "", next.length) : qsTranslate("App", "Precipitation chance peaks at %1 around %2.").arg(percent(peak.precipitation_probability)).arg(peak.local_hour));
     } else
-        parts.push("Precipitation outlook is incomplete.");
+        parts.push(qsTranslate("App", "Precipitation outlook is incomplete."));
     const gusts = next.filter(h => h.wind_gust_m_s !== null && h.wind_gust_m_s !== undefined);
     if (gusts.length === next.length) {
         const peak = Math.max.apply(null, gusts.map(h => h.wind_gust_m_s));
         if (peak >= 8)
-            parts.push("Gusts up to " + wind(peak, units, windUnits) + ".");
+            parts.push(qsTranslate("App", "Gusts up to %1.").arg(wind(peak, units, windUnits)));
     }
     return parts.join(" ");
 }
@@ -1219,4 +1266,289 @@ function radarState(v) {
     if (["closed", "offline", "unsupported", "unavailable"].indexOf(v.status) >= 0 && (v.frames.length || v.legend !== ""))
         throw Error("Invalid unavailable radar payload");
     return v;
+}
+
+// Display formatting never changes canonical weather values.
+function displayNumber(value, precision) {
+    if (typeof weatherFormatNumber === "function")
+        return weatherFormatNumber(value, precision);
+    return Number(value).toFixed(precision);
+}
+
+function languageState(value) {
+    if (value === undefined || value === null)
+        return null;
+    const supported = ["en", "es", "fr", "de", "pt", "ja", "zh-Hans", "zh-Hant", "uk", "hi", "it", "ko", "id", "pl"];
+    if (!object(value) || (value.choice !== "auto" && supported.indexOf(value.choice) < 0) || supported.indexOf(value.effective) < 0)
+        throw Error("Invalid language preference");
+    return {
+        choice: value.choice,
+        effective: value.effective
+    };
+}
+
+// Translate updater presentation without changing persisted states, pins or diagnostics.
+// Literal cases mirror application-authored Go notices; unknown details stay verbatim.
+function knownUpdateText(message) {
+    switch (message) {
+    case "A new release is being prepared. It will be offered when its verified release pin is ready.":
+        return qsTranslate("App", "A new release is being prepared. It will be offered when its verified release pin is ready.");
+    case "A new version is ready to install":
+        return qsTranslate("App", "A new version is ready to install");
+    case "Checking for updates…":
+        return qsTranslate("App", "Checking for updates…");
+    case "Completing the update…":
+        return qsTranslate("App", "Completing the update…");
+    case "Could not check for updates. Check your connection and try again.":
+        return qsTranslate("App", "Could not check for updates. Check your connection and try again.");
+    case "Could not check for updates. Try again.":
+        return qsTranslate("App", "Could not check for updates. Try again.");
+    case "Development checkout · build updates locally":
+        return qsTranslate("App", "Development checkout · build updates locally");
+    case "Downloading the new version…":
+        return qsTranslate("App", "Downloading the new version…");
+    case "Plugin changes were preserved. Review them before trying another update.":
+        return qsTranslate("App", "Plugin changes were preserved. Review them before trying another update.");
+    case "Preparing the update…":
+        return qsTranslate("App", "Preparing the update…");
+    case "Stopping weather effects and preparing to restart…":
+        return qsTranslate("App", "Stopping weather effects and preparing to restart…");
+    case "The bar could not refresh. Reopen it after reviewing the plugin.":
+        return qsTranslate("App", "The bar could not refresh. Reopen it after reviewing the plugin.");
+    case "The previous update stopped. Open the app to recover, or retry the update.":
+        return qsTranslate("App", "The previous update stopped. Open the app to recover, or retry the update.");
+    case "The runtime was restored, but the plugin could not be restored. Review the plugin before trying another update.":
+        return qsTranslate("App", "The runtime was restored, but the plugin could not be restored. Review the plugin before trying another update.");
+    case "The updater did not start. Check for updates and try again.":
+        return qsTranslate("App", "The updater did not start. Check for updates and try again.");
+    case "Updated successfully":
+        return qsTranslate("App", "Updated successfully");
+    case "Updates are unavailable for this installation":
+        return qsTranslate("App", "Updates are unavailable for this installation");
+    case "Verifying the downloaded release…":
+        return qsTranslate("App", "Verifying the downloaded release…");
+    case "You’re up to date. Updates are checked daily.":
+        return qsTranslate("App", "You’re up to date. Updates are checked daily.");
+    case "an update is already in progress":
+        return qsTranslate("App", "an update is already in progress");
+    case "another runtime installer is running":
+        return qsTranslate("App", "another runtime installer is running");
+    case "cannot identify system directory ownership":
+        return qsTranslate("App", "cannot identify system directory ownership");
+    case "cannot identify the installed plugin revision":
+        return qsTranslate("App", "cannot identify the installed plugin revision");
+    case "check for updates before installing":
+        return qsTranslate("App", "check for updates before installing");
+    case "could not refresh the Omarchy bar":
+        return qsTranslate("App", "could not refresh the Omarchy bar");
+    case "development builds must be updated locally":
+        return qsTranslate("App", "development builds must be updated locally");
+    case "development checkouts are built locally":
+        return qsTranslate("App", "development checkouts are built locally");
+    case "development or linked plugins must be updated locally":
+        return qsTranslate("App", "development or linked plugins must be updated locally");
+    case "existing release differs from verified download":
+        return qsTranslate("App", "existing release differs from verified download");
+    case "existing release directory failed verification":
+        return qsTranslate("App", "existing release directory failed verification");
+    case "installation is not owned by this user":
+        return qsTranslate("App", "installation is not owned by this user");
+    case "installation lock is not held":
+        return qsTranslate("App", "installation lock is not held");
+    case "installed runtime version does not match its selector":
+        return qsTranslate("App", "installed runtime version does not match its selector");
+    case "installer unavailable":
+        return qsTranslate("App", "installer unavailable");
+    case "invalid installation path":
+        return qsTranslate("App", "invalid installation path");
+    case "invalid original runtime path":
+        return qsTranslate("App", "invalid original runtime path");
+    case "invalid plugin revision in transaction":
+        return qsTranslate("App", "invalid plugin revision in transaction");
+    case "invalid previous runtime version":
+        return qsTranslate("App", "invalid previous runtime version");
+    case "invalid published release pin":
+        return qsTranslate("App", "invalid published release pin");
+    case "invalid release pin":
+        return qsTranslate("App", "invalid release pin");
+    case "invalid release version":
+        return qsTranslate("App", "invalid release version");
+    case "invalid update journal phase":
+        return qsTranslate("App", "invalid update journal phase");
+    case "no newer supported release is available":
+        return qsTranslate("App", "no newer supported release is available");
+    case "not a stable release":
+        return qsTranslate("App", "not a stable release");
+    case "plugin changed while preparing the update":
+        return qsTranslate("App", "plugin changed while preparing the update");
+    case "plugin update cannot fast-forward; local history was preserved":
+        return qsTranslate("App", "plugin update cannot fast-forward; local history was preserved");
+    case "release pin changed during preparation; check for updates again":
+        return qsTranslate("App", "release pin changed during preparation; check for updates again");
+    case "release publication is not consistent yet":
+        return qsTranslate("App", "release publication is not consistent yet");
+    case "release response exceeds bound":
+        return qsTranslate("App", "release response exceeds bound");
+    case "release version exceeds bound":
+        return qsTranslate("App", "release version exceeds bound");
+    case "runtime selection changed while preparing the update":
+        return qsTranslate("App", "runtime selection changed while preparing the update");
+    case "the new weather app did not start successfully":
+        return qsTranslate("App", "the new weather app did not start successfully");
+    case "the plugin checkout is missing; reinstall it before updating":
+        return qsTranslate("App", "the plugin checkout is missing; reinstall it before updating");
+    case "the plugin checkout is on a custom branch; update it locally":
+        return qsTranslate("App", "the plugin checkout is on a custom branch; update it locally");
+    case "the plugin has local changes; no files were changed":
+        return qsTranslate("App", "the plugin has local changes; no files were changed");
+    case "the plugin's origin is not the official repository":
+        return qsTranslate("App", "the plugin's origin is not the official repository");
+    case "the previous update was interrupted":
+        return qsTranslate("App", "the previous update was interrupted");
+    case "the previous update was interrupted; try the update again":
+        return qsTranslate("App", "the previous update was interrupted; try the update again");
+    case "the runtime selector changed outside this update; reopen your selected version":
+        return qsTranslate("App", "the runtime selector changed outside this update; reopen your selected version");
+    case "this installation does not use the managed release launcher":
+        return qsTranslate("App", "this installation does not use the managed release launcher");
+    case "transaction does not belong to this installation":
+        return qsTranslate("App", "transaction does not belong to this installation");
+    case "unexpected weather service owns the socket":
+        return qsTranslate("App", "unexpected weather service owns the socket");
+    case "unrecognized runtime selection":
+        return qsTranslate("App", "unrecognized runtime selection");
+    case "unsafe installation directory":
+        return qsTranslate("App", "unsafe installation directory");
+    case "unsafe redirect":
+        return qsTranslate("App", "unsafe redirect");
+    case "unsupported plugin checkout":
+        return qsTranslate("App", "unsupported plugin checkout");
+    case "update notice does not match the installed update":
+        return qsTranslate("App", "update notice does not match the installed update");
+    case "updated plugin failed Omarchy validation":
+        return qsTranslate("App", "updated plugin failed Omarchy validation");
+    case "weather effects did not stop cleanly":
+        return qsTranslate("App", "weather effects did not stop cleanly");
+    case "weather service did not exit":
+        return qsTranslate("App", "weather service did not exit");
+    case "wrong runtime answered after restart":
+        return qsTranslate("App", "wrong runtime answered after restart");
+    case "release checksum differs from published pin":
+        return qsTranslate("App", "release checksum differs from published pin");
+    case "release metadata differs from published pin":
+        return qsTranslate("App", "release metadata differs from published pin");
+    case "release was built from modified sources":
+        return qsTranslate("App", "release was built from modified sources");
+    case "archive metadata differs from release metadata":
+        return qsTranslate("App", "archive metadata differs from release metadata");
+    case "archive version differs from selected release":
+        return qsTranslate("App", "archive version differs from selected release");
+    case "unsafe download redirect":
+        return qsTranslate("App", "unsafe download redirect");
+    case "archive exceeds download bound":
+        return qsTranslate("App", "archive exceeds download bound");
+    case "download checksum verification failed":
+        return qsTranslate("App", "download checksum verification failed");
+    case "archive entry limit":
+        return qsTranslate("App", "archive entry limit");
+    case "invalid archive root":
+        return qsTranslate("App", "invalid archive root");
+    case "unsafe or duplicate archive path":
+        return qsTranslate("App", "unsafe or duplicate archive path");
+    case "archive file exceeds bound":
+        return qsTranslate("App", "archive file exceeds bound");
+    case "expanded archive exceeds bound":
+        return qsTranslate("App", "expanded archive exceeds bound");
+    case "archive links and special files are unsupported":
+        return qsTranslate("App", "archive links and special files are unsupported");
+    case "unsupported launcher path":
+        return qsTranslate("App", "unsupported launcher path");
+    case "launcher changed during update":
+        return qsTranslate("App", "launcher changed during update");
+    case "launcher was edited during update":
+        return qsTranslate("App", "launcher was edited during update");
+    case "existing managed release differs from the running bundle":
+        return qsTranslate("App", "existing managed release differs from the running bundle");
+    case "reopen the installed version before updating":
+        return qsTranslate("App", "reopen the installed version before updating");
+    case "running runtime version does not match its manifest":
+        return qsTranslate("App", "running runtime version does not match its manifest");
+    default:
+        break;
+    }
+    let http = message.match(/^release request: HTTP ([0-9]{3})$/);
+    if (http)
+        return qsTranslate("App", "release request: HTTP %1").arg(http[1]);
+    http = message.match(/^download: HTTP ([0-9]{3})$/);
+    if (http)
+        return qsTranslate("App", "download: HTTP %1").arg(http[1]);
+    const command = message.match(/^(git|omarchy|omarchy-plugin-validate) failed$/);
+    if (command)
+        return qsTranslate("App", "%1 failed").arg(command[1]);
+    if (message.startsWith("runtime verification: "))
+        return qsTranslate("App", "runtime verification: %1").arg(updateDiagnostic(message.slice("runtime verification: ".length)));
+    return null;
+}
+function updateDiagnostic(message) {
+    const exact = knownUpdateText(message);
+    if (exact !== null)
+        return exact;
+    const barWarning = " The bar could not refresh. Reopen it after reviewing the plugin.";
+    if (message.endsWith(barWarning))
+        return updateDiagnostic(message.slice(0, -barWarning.length)) + "\n" + qsTranslate("App", "The bar could not refresh. Reopen it after reviewing the plugin.");
+    // errors.Join preserves newline-separated causes; localize only exact known causes.
+    return message.split("\n").map(detail => {
+        const known = knownUpdateText(detail);
+        return known !== null ? known : qsTranslate("App", "Original technical details: %1").arg(detail);
+    }).join("\n");
+}
+function updateStateMessage(state) {
+    switch (state) {
+    case "unsupported":
+        return qsTranslate("App", "Updates are unavailable for this installation");
+    case "development":
+        return qsTranslate("App", "Development checkout · build updates locally");
+    case "current":
+        return qsTranslate("App", "You’re up to date. Updates are checked daily.");
+    case "available":
+        return qsTranslate("App", "A new version is ready to install");
+    case "publishing":
+        return qsTranslate("App", "A new release is being prepared. It will be offered when its verified release pin is ready.");
+    case "checking":
+        return qsTranslate("App", "Checking for updates…");
+    case "downloading":
+        return qsTranslate("App", "Downloading the new version…");
+    case "verifying":
+        return qsTranslate("App", "Verifying the downloaded release…");
+    case "restarting":
+        return qsTranslate("App", "Completing the update…");
+    case "updated":
+        return qsTranslate("App", "Updated successfully");
+    case "rolled_back":
+        return qsTranslate("App", "The update was rolled back.");
+    case "failed":
+        return qsTranslate("App", "Update failed");
+    default:
+        return qsTranslate("App", "Updates are checked daily.");
+    }
+}
+function updateMessage(status) {
+    const message = status && typeof status.message === "string" ? status.message : "";
+    const exact = knownUpdateText(message);
+    if (exact !== null)
+        return exact;
+    if (message.startsWith("Update could not finish: ") && message.endsWith(". Try again."))
+        return qsTranslate("App", "Update could not finish.\n%1\nTry again.").arg(updateDiagnostic(message.slice("Update could not finish: ".length, -". Try again.".length)));
+    if (message.startsWith("Update was not installed: "))
+        return qsTranslate("App", "Update was not installed.\n%1").arg(updateDiagnostic(message.slice("Update was not installed: ".length)));
+    if (message.startsWith("Could not restore the previous version: "))
+        return qsTranslate("App", "Could not restore the previous version.\n%1").arg(updateDiagnostic(message.slice("Could not restore the previous version: ".length)));
+    if (message.startsWith("Restored the previous version. ")) {
+        const detail = message.slice("Restored the previous version. ".length);
+        if (detail.endsWith(". You can retry the update."))
+            return qsTranslate("App", "Restored the previous version. You can retry the update.\n%1").arg(updateDiagnostic(detail.slice(0, -". You can retry the update.".length)));
+        return qsTranslate("App", "Restored the previous version.\n%1").arg(updateDiagnostic(detail));
+    }
+    const stateMessage = updateStateMessage(status ? status.state : "unsupported");
+    return message ? stateMessage + "\n" + updateDiagnostic(message) : stateMessage;
 }

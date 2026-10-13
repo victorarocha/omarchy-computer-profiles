@@ -2,6 +2,7 @@ package buildmeta
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -11,6 +12,12 @@ import (
 )
 
 func TestQuickshellWidgetUpdateActions(t *testing.T) {
+	for _, packaged := range []bool{false, true} {
+		t.Run(fmt.Sprintf("packaged=%t", packaged), func(t *testing.T) { testQuickshellWidgetUpdateActions(t, packaged) })
+	}
+}
+
+func testQuickshellWidgetUpdateActions(t *testing.T, packaged bool) {
 	qs, e := exec.LookPath("quickshell")
 	if e != nil {
 		t.Skip("Quickshell is needed for the isolated bar interaction test")
@@ -34,6 +41,20 @@ func TestQuickshellWidgetUpdateActions(t *testing.T) {
 		t.Fatal(e)
 	}
 	writeRuntimeFixture(t, filepath.Join(dir, "WeatherWidget.qml"), raw, 0600)
+	translations, err := os.ReadFile("../../quickshell/a-weather-app.weather/Translations.js")
+	if err != nil {
+		t.Fatal(err)
+	}
+	writeRuntimeFixture(t, filepath.Join(dir, "Translations.js"), translations, 0600)
+	if packaged {
+		cmd := exec.Command("bash", "../../scripts/package_widget.sh", filepath.Join(dir, "WeatherWidget.qml"))
+		if output, err := cmd.CombinedOutput(); err != nil {
+			t.Fatal(err, string(output))
+		}
+		if err := os.Remove(filepath.Join(dir, "Translations.js")); err != nil {
+			t.Fatal(err)
+		}
+	}
 	helper := `#!/usr/bin/bash
 set -euo pipefail
 printf '%s\n' "$*" >> "$HOME/actions"
@@ -54,6 +75,8 @@ ShellRoot {
         }
         Timer { interval: 800; running: true; onTriggered: {
             if (widget.update.installed !== "0.51.5" || widget.update.available !== "0.51.9" || !widget.updateNotice) throw "missing update notice";
+            widget.language = "es";
+            if (widget.tr("Check for updates") === "Check for updates") throw "missing bundled translations";
             widget.activateWidget();
             widget.checkUpdates(true);
         } }

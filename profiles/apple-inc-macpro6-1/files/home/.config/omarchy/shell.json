@@ -44,7 +44,7 @@
       ],
       "right": [
         {
-          "id": "chriopter.brumm"
+          "id": "cider.bar"
         },
         {
           "id": "jankeesvw.text-transform"
@@ -106,8 +106,8 @@
     "omarchy.wifiqr"
   ],
   "idle": {
-    "lock": 300,
-    "screensaver": 150
+    "lock": 1200,
+    "screensaver": 600
   },
   "plugins": [
     {

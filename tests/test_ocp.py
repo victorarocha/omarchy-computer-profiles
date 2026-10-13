@@ -172,6 +172,50 @@ class CaptureTests(unittest.TestCase):
         with self.assertRaises(ValueError): match_hardware(m,h)
         match_hardware(m,h,True)
 
+class DeleteTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp=tempfile.TemporaryDirectory();self.addCleanup(self.tmp.cleanup)
+        self.root=pathlib.Path(self.tmp.name)
+        self.folder=self.root/'profiles/example-model'
+        self.folder.mkdir(parents=True)
+        (self.folder/'broken.json').write_text('incomplete profile')
+        self.root_patch=patch('ocp_lib.__main__.ROOT',self.root)
+        self.root_patch.start();self.addCleanup(self.root_patch.stop)
+    def run_delete(self,*args):
+        import io,sys
+        from ocp_lib.__main__ import main
+        output=io.StringIO()
+        with patch.object(sys,'argv',['ocp','delete',*args]),patch('sys.stdout',output): main()
+        return output.getvalue()
+    def test_preview_keeps_profile(self):
+        self.assertIn('Would delete',self.run_delete('example-model'))
+        self.assertTrue((self.folder/'broken.json').exists())
+    def test_execute_removes_incomplete_profile_only(self):
+        other=self.root/'profiles/other';other.mkdir()
+        self.assertIn('Deleted profile',self.run_delete('example-model','--execute'))
+        self.assertFalse(self.folder.exists());self.assertTrue(other.exists())
+    def test_missing_profile_refused(self):
+        with self.assertRaisesRegex(ValueError,'Profile not found'): self.run_delete('missing','--execute')
+    def test_path_traversal_refused(self):
+        for name in ['../example-model','/tmp/example-model','..']:
+            with self.subTest(name=name),self.assertRaisesRegex(ValueError,'Invalid profile ID'):
+                self.run_delete(name,'--execute')
+        self.assertTrue(self.folder.exists())
+    def test_profile_symlink_refused(self):
+        (self.root/'profiles/link').symlink_to(self.folder,target_is_directory=True)
+        with self.assertRaisesRegex(ValueError,'symlink'): self.run_delete('link','--execute')
+        self.assertTrue(self.folder.exists())
+    def test_profiles_directory_symlink_refused(self):
+        (self.root/'profiles').rename(self.root/'stored-profiles')
+        (self.root/'profiles').symlink_to(self.root/'stored-profiles',target_is_directory=True)
+        with self.assertRaisesRegex(ValueError,'symlink'): self.run_delete('example-model','--execute')
+        self.assertTrue(self.folder.exists())
+    def test_payload_symlink_does_not_delete_target(self):
+        target=self.root/'keep.txt';target.write_text('keep')
+        (self.folder/'link').symlink_to(target)
+        self.run_delete('example-model','--execute')
+        self.assertEqual(target.read_text(),'keep')
+
 class RestoreTests(unittest.TestCase):
     def test_atomic_install_and_restore_existing_and_new_file(self):
         with tempfile.TemporaryDirectory() as tmp:

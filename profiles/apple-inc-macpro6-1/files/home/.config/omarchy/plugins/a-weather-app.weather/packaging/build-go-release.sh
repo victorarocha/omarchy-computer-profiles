@@ -57,6 +57,7 @@ for copy in first second; do
       run_phase go-lint make lint
       run_phase go-race go test -race ./...
       run_phase go-vet go vet ./...
+      run_phase translation-coverage bash scripts/i18n_catalogs.sh --check --complete
       run_phase qt-tests make -C native/qt test
       run_phase native-format make check-native-qml-format
       run_phase native-analysis make check-native-analysis
@@ -119,11 +120,13 @@ done
 for asset in LICENSE THIRD_PARTY_NOTICES.md manifest.json packaging/a-weather-app.desktop packaging/icons/a-weather-app.svg quickshell/a-weather-app.weather/WeatherWidget.qml packaging/go-README.md; do
   install -D -m 644 "$build_root/first/$asset" "$runtime_root/$asset"
 done
+bash "$build_root/first/scripts/package_widget.sh" "$runtime_root/quickshell/a-weather-app.weather/WeatherWidget.qml"
 sed -i "s/\"version\": \"$source_version\"/\"version\": \"$release_version\"/" "$runtime_root/manifest.json"
 cp -a --no-preserve=ownership "$build_root/first/licenses" "$runtime_root/licenses"
 install -m 644 "$build_root/first/packaging/go-README.md" "$runtime_root/README.md"
 git -c safe.directory=/source -C /source status --porcelain --untracked-files=all
 run_phase package-manifest "$build_root/first/build/weather-package" create --root "$runtime_root" --source /source
+run_phase updater-compatibility bash "$build_root/first/scripts/test_update_compatibility.sh" "$runtime_root"
 run_phase native-linkage bash "$build_root/first/packaging/collect_native_linkage.sh" "$runtime_root" "$output_root/evidence/native-linkage"
 run_phase packaged-integration make -C "$build_root/first/native/qt" test-e2e GO_APP="$runtime_root/a-weather-app"
 run_phase runtime-verification bash "$build_root/first/scripts/verify_go_runtime.sh" "$runtime_root" /source "$build_root/first/build/weather-package"

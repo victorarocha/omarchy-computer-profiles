@@ -8,6 +8,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/joega/a-weather-app/internal/locale"
 	"github.com/joega/a-weather-app/internal/safeio"
 	"github.com/joega/a-weather-app/internal/weather"
 )
@@ -43,6 +44,8 @@ type warningDetailRecord struct {
 // its owner. It does no provider polling and creates no idle goroutine/timer.
 // Tick must run on target/policy changes and before delivering observations.
 type WarningWatcher struct {
+	formatDate                   locale.DateFormatter
+	language                     string
 	state                        *safeio.Directory
 	files                        warningFiles
 	document                     M
@@ -161,6 +164,14 @@ func (w *WarningWatcher) WantsFeed() bool {
 // SetDeliveryReady tracks transient native availability separately from saved
 // opt-in. Losing the daemon cancels work and requires a fresh observation when
 // it returns; an unavailable adapter must not cause background history polling.
+func (w *WarningWatcher) SetDateFormatter(format locale.DateFormatter) { w.formatDate = format }
+
+func (w *WarningWatcher) SetLanguage(code string) {
+	if locale.Valid(code) {
+		w.language = code
+	}
+}
+
 func (w *WarningWatcher) SetDeliveryReady(ready bool) {
 	if w.deliveryReady == ready {
 		return
@@ -502,15 +513,25 @@ func (w *WarningWatcher) evaluate(now time.Time) {
 			w.fail(reason)
 			return
 		}
-		notice := warningNotice(d, m, w.name, w.zone, settings)
+		notice := localizedWarningNotice(w.language, d, m, w.name, w.zone, settings)
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 		job := &warningDeliveryJob{receipt: r, message: m, ctx: ctx, cancel: cancel, done: make(chan error, 1)}
 		w.job, w.delivery, w.lastNotice = job, "pending", &notice
 		w.rememberDetail(notice, m, now)
 		w.nextDelivery = now.Add(warningDeliverySpacing)
 		send, signal := w.send, w.signal
+		formatDate, language, place, zone := w.formatDate, w.language, w.name, w.zone
 		go func() {
-			err := send(ctx, notice)
+			deliveryNotice := notice
+			if formatDate != nil && d.Kind != "canceled" {
+				deliveryNotice = localizedWarningNoticeWithDate(language, d, m, place, zone, settings, formatDate(ctx, m.Expires, zone))
+			}
+			var err error
+			if ctx.Err() != nil {
+				err = ctx.Err()
+			} else {
+				err = send(ctx, deliveryNotice)
+			}
 			if contextErr := ctx.Err(); contextErr != nil {
 				err = contextErr
 			}
@@ -561,12 +582,19 @@ func (w *WarningWatcher) Snapshot() M {
 	}
 	var last any
 	if w.lastNotice != nil {
-		last = M{"key": w.lastNotice.Key, "location": w.lastNotice.Location, "place": w.lastNotice.Place, "kind": w.lastNotice.Kind, "title": w.lastNotice.Title}
+		title := w.lastNotice.Title
+		for _, d := range w.details {
+			if d.notice.Key == w.lastNotice.Key {
+				title = warningDisplayTitle(w.language, d.notice.Kind, d.message.Event)
+				break
+			}
+		}
+		last = M{"key": w.lastNotice.Key, "location": w.lastNotice.Location, "place": w.lastNotice.Place, "kind": w.lastNotice.Kind, "title": title}
 	}
 	recent := make([]any, 0, len(w.details))
 	for i := len(w.details) - 1; i >= 0; i-- {
 		d := w.details[i]
-		recent = append(recent, M{"key": d.notice.Key, "location": d.notice.Location, "place": d.notice.Place, "title": d.notice.Title, "kind": d.notice.Kind, "created_at": d.created.UTC().Format(time.RFC3339), "delivery": d.delivery})
+		recent = append(recent, M{"key": d.notice.Key, "location": d.notice.Location, "place": d.notice.Place, "title": warningDisplayTitle(w.language, d.notice.Kind, d.message.Event), "kind": d.notice.Kind, "created_at": d.created.UTC().Format(time.RFC3339), "delivery": d.delivery})
 	}
 	return M{"settings": safeio.Clone(w.document["settings"].(M)), "state": w.mode, "reason": w.reason, "paused_until": w.document["paused_until"], "supported": w.send != nil, "delivery": w.delivery, "fetched_at": fetched, "complete": w.complete, "last": last, "recent": recent}
 }

@@ -1,3 +1,4 @@
+import "Translations.js" as Translations
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -18,8 +19,12 @@ OmarchyUi.BarWidget {
     readonly property string output: safeSelector(setting("output", ""), /^[A-Za-z0-9_.:-]{1,128}$/)
     readonly property bool configured: projectPath !== "" && statePath !== ""
     readonly property bool opened: app.running
+    property string language: Translations.detect((Quickshell.env("LANGUAGE") || "").split(":").concat([Quickshell.env("LC_ALL") || Quickshell.env("LC_MESSAGES"), Quickshell.env("LANG")]))
+    function tr(source, args) {
+        return Translations.text(language, source, args);
+    }
     property string label: "A Weather App"
-    property string tooltip: "Open A Weather App to choose a location"
+    property string tooltip: tr("Open A Weather App to choose a location")
     property string buffer: ""
     property bool rejected: false
     property bool pendingOpen: false
@@ -28,7 +33,7 @@ OmarchyUi.BarWidget {
             state: "unsupported",
             installed: "",
             available: "",
-            message: "Open the app for version information",
+            message: tr("Open the app for version information"),
             checked_at: 0
         })
     property bool manualUpdateCheck: false
@@ -40,7 +45,7 @@ OmarchyUi.BarWidget {
     implicitHeight: barSize
     activeFocusOnTab: configured
     Accessible.role: Accessible.Button
-    Accessible.name: "Toggle A Weather App window"
+    Accessible.name: tr("Toggle A Weather App window")
     Accessible.description: plain(tooltip, 256)
     Accessible.onPressAction: activateWidget()
     Keys.onReturnPressed: activateWidget()
@@ -128,6 +133,8 @@ OmarchyUi.BarWidget {
             const value = JSON.parse(buffer);
             if (!value || typeof value !== "object" || Array.isArray(value) || value.schema_version !== 1 || typeof value.label !== "string" || value.label.length > 96 || typeof value.tooltip !== "string" || value.tooltip.length > 256 || ["fresh", "stale", "expired", "invalid_future", "unavailable"].indexOf(value.freshness) < 0)
                 throw "invalid";
+            if (typeof value.language === "string" && Translations.match(value.language) === value.language)
+                language = value.language;
             label = plain(value.label, 96);
             tooltip = plain(value.tooltip, 256);
             const u = value.update;
@@ -145,8 +152,8 @@ OmarchyUi.BarWidget {
                 }
             }
         } catch (error) {
-            label = "—° · Unavailable";
-            tooltip = "A Weather App forecast unavailable";
+            label = "—° · " + root.tr("Unavailable");
+            tooltip = tr("A Weather App forecast unavailable");
         }
     }
     function refreshSaved() {
@@ -325,8 +332,8 @@ OmarchyUi.BarWidget {
             if (code === 0 && !root.rejected)
                 root.acceptRead();
             else {
-                root.label = "—° · Unavailable";
-                root.tooltip = "A Weather App forecast unavailable";
+                root.label = "—° · " + root.tr("Unavailable");
+                root.tooltip = root.tr("A Weather App forecast unavailable");
             }
             root.buffer = "";
             if (root.pendingRead)
@@ -428,7 +435,7 @@ OmarchyUi.BarWidget {
             spacing: Style.space(10)
             Text {
                 width: parent.width
-                text: "A Weather App updates"
+                text: root.tr("A Weather App updates")
                 textFormat: Text.PlainText
                 color: Color.foreground
                 font.pixelSize: root.fontTokens.body
@@ -436,7 +443,7 @@ OmarchyUi.BarWidget {
             }
             Text {
                 width: parent.width
-                text: "Installed " + (root.update.installed || "unknown") + (root.update.available ? " · Available " + root.update.available : "")
+                text: root.tr("Installed %1", [root.update.installed || root.tr("unknown")]) + (root.update.available ? " · " + root.tr("Available %1", [root.update.available]) : "")
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
                 color: Color.foreground
@@ -444,14 +451,14 @@ OmarchyUi.BarWidget {
             }
             Text {
                 width: parent.width
-                text: root.updateError || (updateInstaller.running ? "Downloading and verifying the update…" : root.waitingForUpdater ? "Starting the update…" : updateChecker.running ? "Checking for updates…" : root.update.message || "You have the latest supported release")
+                text: root.tr(root.updateError) || (updateInstaller.running ? root.tr("Downloading and verifying the update…") : root.waitingForUpdater ? root.tr("Starting the update…") : updateChecker.running ? root.tr("Checking for updates…") : Translations.updateMessage(root.language, root.update))
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
                 color: Color.foreground
                 font.pixelSize: root.fontTokens.body
             }
             OmarchyUi.Button {
-                text: "Update and restart"
+                text: root.tr("Update and restart")
                 visible: root.update.available !== ""
                 enabled: !root.updateBusy && !updateChecker.running
                 focusable: true
@@ -459,14 +466,14 @@ OmarchyUi.BarWidget {
                 onClicked: root.installUpdate()
             }
             OmarchyUi.Button {
-                text: "Check for updates"
+                text: root.tr("Check for updates")
                 enabled: !root.updateBusy && !updateChecker.running && root.update.state !== "development"
                 focusable: true
                 bordered: true
                 onClicked: root.checkUpdates(true)
             }
             OmarchyUi.Button {
-                text: "Open forecast"
+                text: root.tr("Open forecast")
                 enabled: !root.updateBusy
                 focusable: true
                 onClicked: {
@@ -475,7 +482,7 @@ OmarchyUi.BarWidget {
                 }
             }
             OmarchyUi.Button {
-                text: "Close"
+                text: root.tr("Close")
                 focusable: true
                 onClicked: updatePopup.open = false
             }

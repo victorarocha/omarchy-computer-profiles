@@ -111,6 +111,17 @@ push to your fork and open a pull request. OCP never commits or uploads during
 capture. Use `git pull --ff-only` to bring other contributors' profiles into your
 clone. Files in `profiles/` are ordinary versioned repository files.
 
+To remove a profile from your local repository:
+
+```bash
+./ocp delete apple-macpro6-1-d500           # preview
+./ocp delete apple-macpro6-1-d500 --execute # delete the profile directory
+```
+
+Deletion removes the profile and all its captured files, including damaged or
+incomplete profiles. It does not undo an applied configuration or remove backups.
+For tracked profiles, review and commit the deletion using Git to share it.
+
 ## What's captured
 
 | Area | Contents |

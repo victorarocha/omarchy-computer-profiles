@@ -2,7 +2,7 @@
   "schema_version": 1,
   "id": "apple-inc-macpro6-1",
   "author": "Victor Arocha",
-  "created_at": "2026-10-11T22:41:59.233655+00:00",
+  "created_at": "2026-10-13T02:03:11.236721+00:00",
   "description": "Community hardware profile for Apple Inc. MacPro6,1",
   "hardware": {
     "vendor": "Apple Inc.",
@@ -1065,9 +1065,9 @@
   "plugins": [
     {
       "id": "a-weather-app.weather",
-      "version": "0.70.2",
+      "version": "0.71.1",
       "origin": "https://github.com/joega/a-weather-app.git",
-      "revision": "dc90e13290b861d54c1502ab81bed76dcb6ab91e",
+      "revision": "f0c7bd65ddcc5709f21c631dc2fde823605bd99c",
       "modified": false,
       "license": "MIT",
       "skipped_assets": [
@@ -1083,6 +1083,16 @@
       "version": "1.0.0",
       "origin": null,
       "revision": null,
+      "modified": false,
+      "license": "MIT",
+      "skipped_assets": [],
+      "runtime_setup": "Review the captured upstream README for any native runtime setup."
+    },
+    {
+      "id": "cider.bar",
+      "version": "1.1.1",
+      "origin": "https://github.com/ndrewtx/omarchy-cider-bar.git",
+      "revision": "c10e6fb573a2f057a9ea9e4407b25c55f9af2b64",
       "modified": false,
       "license": "MIT",
       "skipped_assets": [],
@@ -1171,9 +1181,9 @@
     },
     {
       "id": "omamail",
-      "version": "0.10.8",
+      "version": "0.11.0",
       "origin": "https://github.com/huacnlee/omamail.git",
-      "revision": "a4d0b78d49ebffbf570f54557325b625911977e1",
+      "revision": "5db17740f99feb1252ba136db20d9fb67899cd91",
       "modified": false,
       "license": "MIT",
       "skipped_assets": [],
@@ -1249,7 +1259,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/Makefile",
-      "sha256": "9fa98a8ec6d9222bac943a497e7fe8088165afe5fbac750618716fcee1cb5079",
+      "sha256": "ee704902ea0dc48278dd1fc420d66d8d58dd9e7f53d5886f39a80eb95b85cb7e",
       "mode": 420
     },
     {
@@ -1261,7 +1271,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/README.md",
-      "sha256": "ea9b3a8d12185b23565065e0c31653bb2e64adec262b10667b6e1334f1985858",
+      "sha256": "2501155b906c44eb80435ffc5ebae166725cd9292c77aa98cefb56301a3c8521",
       "mode": 420
     },
     {
@@ -1285,7 +1295,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/cmd/a-weather-app/main.go",
-      "sha256": "5d5adb40d456395c5ae23f2e329271fa7d876fec8ec63da9f80743fe798010fa",
+      "sha256": "4c1a820fa5b0e05b289ee2d9eddcb2f2547e0b261e7c8dd50907ff1e38954710",
       "mode": 420
     },
     {
@@ -1494,6 +1504,18 @@
     },
     {
       "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/docs/reviews/native-i18n-independent-review.md",
+      "sha256": "0176e8bb85e25f5643a8cd53d9e6101fa7f2204a58ddec05605b0088f6ccc5a0",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/docs/reviews/native-i18n-qa.md",
+      "sha256": "1db52859417c41a8e06f830943d82a732504247db741755747debfcee70aec38",
+      "mode": 420
+    },
+    {
+      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/docs/reviews/native-qml-maintenance-sprint.md",
       "sha256": "d93d357938315a044d6696d69913bb5de999ce61284ead23df377c6ffbafe0a8",
       "mode": 420
@@ -1579,7 +1601,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/air_quality.go",
-      "sha256": "d6d91be8c961c45be7889fb597ec862ab292f74dd9b471565603de479c29fdbf",
+      "sha256": "ab48d3251b3e19c4809807351dad1ec96fadcea6fbd822330173e8774afb0189",
       "mode": 420
     },
     {
@@ -1591,7 +1613,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/air_quality_test.go",
-      "sha256": "9f9c42ffc9cbc364c66178247286f80da371dc66f9bb145c86fcc1a88a911620",
+      "sha256": "100c88f6c3bc50ec5462ac924512ce1e27fda7f6e384a4742d26d36e2ef40387",
       "mode": 420
     },
     {
@@ -1633,7 +1655,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/app.go",
-      "sha256": "fa8bf5196b83fa00d59a03db53f9defdac5e4d4d2d68808cbfe3aa5b9987d2b9",
+      "sha256": "eee25bba0195119624d2ac1ec12e8d31b5cbb5588073007311edc94d02868e9f",
       "mode": 420
     },
     {
@@ -1669,7 +1691,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/bar.go",
-      "sha256": "9ae8ba418248bfc83f0d02464fe061ef8f6146554d9ab1a8708067309fcd8a11",
+      "sha256": "b1dc15ddd4c1da52223c3ea94b7820c0a16effdaf5a64095e50bf16a40662d90",
       "mode": 420
     },
     {
@@ -1741,13 +1763,25 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/forecast_work.go",
-      "sha256": "2f8d23a4034a84e91d50880e76ec0a15b63eebb595643b1d88e75ae6b1e146f4",
+      "sha256": "9f5c21081dcffc1515f187b720b4ddcda784f9a313eb3b8c12191483f76b94fc",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/idle_work_test.go",
       "sha256": "de30f005b6beb08cb2c78dcc7394a51e3d17c6f8d82dae3aa89eaee089d5079e",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/language.go",
+      "sha256": "4dbd94a2aec4e455c7e04156ab368cdc9930c6662d61b88fcb79f26b00742f55",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/language_test.go",
+      "sha256": "809627e81c9a99b8778f44de6862110c3336a13048eb7725e3f02ac0c4ff8042",
       "mode": 420
     },
     {
@@ -1812,8 +1846,20 @@
     },
     {
       "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/place_metadata.go",
+      "sha256": "f550f4ec0000dc820b0320e890d313adcc6ab5036f7e6bf229a19c56b5674ed2",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/place_metadata_test.go",
+      "sha256": "e0c493fc91dede1c89dfdcb257b829aee91ed68c3716329a66015822480f0da5",
+      "mode": 420
+    },
+    {
+      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/places.go",
-      "sha256": "cc5a66c69ebb3be2146bc7a64cc6d3aa99edbff8b9a3f7b9e9052dad633f52b6",
+      "sha256": "40efc9a4f4bbe13b23a4b7e813cc65d1c417c355f0b3ae3d4a33daaffedb4f72",
       "mode": 420
     },
     {
@@ -1939,7 +1985,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/app/snapshot.go",
-      "sha256": "c679d2ac2376b3e34fd4c5f5f613004f69a6fcfc58dbdb25de5fda99ee810fec",
+      "sha256": "2f3a51a9ad70534faec350d07132250074f5120a00d09b43413f8faf64967a65",
       "mode": 420
     },
     {
@@ -2047,13 +2093,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/buildmeta/buildmeta.go",
-      "sha256": "e3d3739b67c0db074a2085a0935611da8ab026978ba117b42d6ed38ecfb6be3f",
+      "sha256": "c19e5dad10687a9b8923224e40150d0c9fb662e22075aa032ff37bf33a4e8984",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/buildmeta/buildmeta_test.go",
-      "sha256": "608fb7176a5d4350f633188499399d3d5ed225f9a9c79f6a36fb7826cce3c60d",
+      "sha256": "2b0d229afbb07f5d869b8a9290357c23bf04cc7966f14c7633e7195a2347a944",
       "mode": 420
     },
     {
@@ -2071,7 +2117,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/buildmeta/widget_updates_test.go",
-      "sha256": "c9f594065a9d9546b0249cf51abe22e35b76b117499cab9cc58f0b3f5db06ce6",
+      "sha256": "ac4b3ba28fdae0759ff941a16f3d1915d126b5d84c4cdd62cdea817d1574aa59",
       "mode": 420
     },
     {
@@ -2190,6 +2236,120 @@
     },
     {
       "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalog.go",
+      "sha256": "8926a045499a3da577a845af7105f0d22604e74c5ad40eaf02e7ebc43de99cbb",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/de.json",
+      "sha256": "0295f0430653d4dee6f6b7d16f072f62ed7afe1c88b96ce1b67a9d33b78dfab5",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/en.json",
+      "sha256": "63e9dfd1f905de18bf30aa6f6564c6e82b5d894e2c9d9de8954f21b898766a0c",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/es.json",
+      "sha256": "adbff8d71be52a5e8eaee0af55e1c15cecf9be9c40e048dbd168514e99f82254",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/fr.json",
+      "sha256": "11f105444f977a9bb5ea68590fc5b13f230872ddf2bebf21538932c5e1448ffe",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/hi.json",
+      "sha256": "442ccdbee9bb84ea23491798db99c375ed4fd73d1ed3cd2c63ac0c1ff1b4fa30",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/id.json",
+      "sha256": "5aa6f8bb93d44538a363fd25b9a3f5e8c3e9052509689c090f2bf0ec89bc6cdd",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/it.json",
+      "sha256": "025a1154e548b0dfa276177bb9abdeec58c110a2bb72a376604abf5e3876b98d",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/ja.json",
+      "sha256": "261b370691ad6b65417a4a815eb8887e36158ac6c789cba60151b1bd4a5a60a0",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/ko.json",
+      "sha256": "073b714e812597b9ede291e7975c6916e49cecb9dd81d579aa228282279f736b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/pl.json",
+      "sha256": "cf02ec40ccbc8d4c9c4675df923620bcc5ef821b33e50312b4385a35c15ae38e",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/pt.json",
+      "sha256": "0769edd521eb6fa34ed1a881eea086216163bbd7e99a99ee7f40fa254958b48a",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/uk.json",
+      "sha256": "31416705b1aa8d85572e2574969b5ef3537d587295c7948812a30cf64dd8fc80",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/zh-Hans.json",
+      "sha256": "a80afbe41fe62951f836f47e27277933a820e49952cf911b07198194625ba860",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/catalogs/zh-Hant.json",
+      "sha256": "414573b99ee813a5f5692cbddf4ea78f19c1217de6aa660cc2b023c97fb7fc63",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/language.go",
+      "sha256": "6b6008c1d0e768537cc17fa2fc8a0d7365b60853dba97c63e7430a70eee28d21",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/language_test.go",
+      "sha256": "9c60e462821693b7171c850de6046f246d8b82d523ac051a505b08920d15763b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/notification_time.go",
+      "sha256": "a1f4440074f0f6767790b004d2313b127419a5a53c4fc3deaca89b6626967143",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/locale/notification_time_test.go",
+      "sha256": "ad4b0344786c88d4e9f8c59ab65bcad3b44b45c3f322031a8643cbecdb11eb01",
+      "mode": 420
+    },
+    {
+      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/nativebuild/command.go",
       "sha256": "ea398e5bd642279c98f3a420f5b86379180c642fe3f1eb51063487eeafec4b46",
       "mode": 420
@@ -2239,13 +2399,19 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/notifications/cache.go",
-      "sha256": "b036b3691545ef663411c6b1941a289d4332e493235c7516d3032ea994c5ab4c",
+      "sha256": "189c6506ff9bdfe7fbb47a0c7f8d03a777c9c9bb2c60b210d9060a754de16092",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/notifications/cache_test.go",
       "sha256": "bdb49acfd093175125ffc8b3916809d165b08889bfcb0baa45d09adca785c6c7",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/internal/notifications/notification_time_test.go",
+      "sha256": "130203e8d72039175b5045a2815a2b7144dc3e44c50c0456b6ea5286f589dbbf",
       "mode": 420
     },
     {
@@ -2269,7 +2435,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/notifications/warning_policy.go",
-      "sha256": "419ac866fbd5062711d6adac1a8b185a60d044b3781b78b28a1b6246812750d3",
+      "sha256": "819846f4d506ec1285abf5d891e32d4fffd95a7f7871cbe620c0d4674696a9f3",
       "mode": 420
     },
     {
@@ -2281,7 +2447,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/notifications/warning_watcher.go",
-      "sha256": "cb9867f56208ce64c2c8a413bd04322250d41052aa71f420249870ba74cdc438",
+      "sha256": "61ca5746b5cd6fbaf431569a4e983e68166761fa166102c1216cafe8e81c038b",
       "mode": 420
     },
     {
@@ -2293,13 +2459,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/notifications/watcher.go",
-      "sha256": "3a4d5c714e8795c56b9dc9218db96468d51f1cb9c362cb5294e2249c6c1cd187",
+      "sha256": "99111d35b91f0df4c7bd1a598dc7374eefd7fc8a2814cc4e79fee8a09d43efac",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/notifications/watcher_test.go",
-      "sha256": "63645e5910ae689bffca7b4706c36d0a8e91ada74de0f99d8b612f35982d6280",
+      "sha256": "eb7bdbfb1d5e1ab3f516e9a250a07a28ae811affafad99c022f2de252eb56c46",
       "mode": 420
     },
     {
@@ -2521,7 +2687,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/updater/desktop_test.go",
-      "sha256": "39d940743317dc6e0105e42dafb7fcd4799418f2f7b050bb68e4e5bff66bed76",
+      "sha256": "6868b6a734b642168c934df4d576c80bda1f774eab03ed2fdb76993b486044be",
       "mode": 420
     },
     {
@@ -2641,13 +2807,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/weather/geocoding.go",
-      "sha256": "1f68a40b1f1c0df8b9ca3ef7d83102b2e9b4956c977359c92dd4eb05aa0f3287",
+      "sha256": "7eafa28a8402e6eff1f6ae7e6dcb8b413dc16c8cd69e489c1e940ed372c7e91a",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/internal/weather/geocoding_test.go",
-      "sha256": "060d7b70f2a2df84c9b0e4343d07ea9de98ce452e3286dbff68bc33138a3c4e4",
+      "sha256": "90a8fb887679ba377639af903abede08c3b39b8c5551fa999203260d87d7fbc5",
       "mode": 420
     },
     {
@@ -2725,7 +2891,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/manifest.json",
-      "sha256": "032908cee1ba374c266b557b69a7373447358bc7455fb9bd81bb0d62273a81c8",
+      "sha256": "b4e38d0dc88a5f940b8299c9e8937a17f68ba2115899614a8bea328c172d4a73",
       "mode": 420
     },
     {
@@ -2804,6 +2970,12 @@
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/media/forecast-mumbai.png",
       "sha256": "e7dca197779c9a4f7946c6b71ac07b29433492cfc4da05f62f17463af3c8b950",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/media/language-settings-shanghai.png",
+      "sha256": "4783ce2670ac1af73f526dca87980d93180fc16bb2b8fd1d163e515741402942",
       "mode": 420
     },
     {
@@ -2977,19 +3149,19 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/Makefile",
-      "sha256": "6c8e991076f80bae129d7836005db79b5297a2f9354100dae87801780f97e3c9",
+      "sha256": "0fe4e55b4874283bac73e3e208be69a37e71bb50f800c855c60cce493bc76a8e",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/a-weather-app-qt.pro",
-      "sha256": "40a24075c76cb5a5e754ad8ed047d042c3c878eb3adea6150af1a2ac1d1e4f42",
+      "sha256": "57c3bb860be4e6a7d08714f2879f23f124975d3a1ba94d335cd341041af227ee",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/desktopwarnings.cpp",
-      "sha256": "4e9b442e881f0fb16a4313f066b2197ec9901ccce7edc3e48f56883bd6d20f5a",
+      "sha256": "6354e96863e08336174d5bb9b96d312b43fe25cdd88050f46b1efb355d6db8ae",
       "mode": 420
     },
     {
@@ -3012,8 +3184,20 @@
     },
     {
       "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/i18n.cpp",
+      "sha256": "13d7fd5e3926098da83aa6a99dee2270a72b908086ddadc7cce63ba9dc997eea",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/i18n.h",
+      "sha256": "ec0cb20408f2cf43ef3550ec94ec08ef0246e30fe4d92f55fcfa5defaa479645",
+      "mode": 420
+    },
+    {
+      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/main.cpp",
-      "sha256": "1b11908ef3277706851f01b5c098b1f2875234f7435259990164726e9d33ccee",
+      "sha256": "5140020000849b38e5221ab2897fc4c5dbc2e4fccf84b88fe64b09275dbf7206",
       "mode": 420
     },
     {
@@ -3061,7 +3245,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/resources.qrc",
-      "sha256": "6889c09ce411bda1c9a55a834e85f73b6ecd9798f9a6c7f8c5a35488607fea58",
+      "sha256": "1af5bd53b8c1bad0e3f626e949149b4177735a8bd7efb0d1796d1f9345f37605",
       "mode": 420
     },
     {
@@ -3073,7 +3257,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/native/qt/transport.cpp",
-      "sha256": "1bdb72283a728ca20cc0a00d7da1a248c2651cd57ba55e09ea76eebabcb8f1f9",
+      "sha256": "7eeae00179175a5188051527af823e02926a6fbc5861f5e5696a3f3d03bac1e9",
       "mode": 420
     },
     {
@@ -3115,13 +3299,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/packaging/a-weather-app.desktop",
-      "sha256": "d399a4a6cf8392ad079627c353246d48f0cf759624f9c2094e95d9ca4be238e0",
+      "sha256": "7a819852c53898cc631bd640956184b3982b6b4ab2b74174570df40730531852",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/packaging/build-go-release.sh",
-      "sha256": "c8e3a795f990c18420c28c1eb5f690e2744fb23beff2184de6735330fa318703",
+      "sha256": "4ab99e574143996c8b25c7f56db52fabb2f7bd23d7a5151f396debd290a60a3c",
       "mode": 420
     },
     {
@@ -3133,7 +3317,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/packaging/check_qt_sanitizers.sh",
-      "sha256": "44ed81bb71cb78a2f187cd782b4a71ec1d5440a592435fe5747e490ab8e9d975",
+      "sha256": "81292f75c83d3b41b8dcc7eec57d8d7d6f939d3d5546f068153926359839e694",
       "mode": 420
     },
     {
@@ -3157,7 +3341,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/packaging/go-container.sh",
-      "sha256": "b47f93f4b7c1da7a605df998331a8ab2908edc2aedc7f8270870b9e093677bb2",
+      "sha256": "bd5d1204befb88cd3d80c4cb8d27e2ea07774d24557ab797cb385c9230058ae0",
       "mode": 420
     },
     {
@@ -3193,7 +3377,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/packaging/release-lock.json",
-      "sha256": "ca7cdfb458afadfdedd3e1563607ee4cbdd721b614059397d97ed49308257207",
+      "sha256": "bea67ba40ba950e8bed7bcdaf36a7ffa82e75ecee6b40eb76cfe6de8cbfc3cb2",
       "mode": 420
     },
     {
@@ -3205,7 +3389,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/packaging/release-series.txt",
-      "sha256": "b6424e5b19cc2ca70f7a14b6b91e32b525dd97c3f2236ab3a9980f2fc2874e98",
+      "sha256": "e142ddfa1ca2d23de96636bf114451eb4d4f13f1522615146010c0594c0ba2f6",
       "mode": 420
     },
     {
@@ -3270,6 +3454,18 @@
     },
     {
       "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/packaging/releases/v0.71.0.md",
+      "sha256": "8017c98d3df8fc5dad2b0d6b106172e4edec1c516e64dbf4f73ff0be092515f3",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/packaging/releases/v0.71.1.md",
+      "sha256": "c45c5e45095958346662759fb6f67df31bfb310da0a2e7dcf44d2641281eacb8",
+      "mode": 420
+    },
+    {
+      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/packaging/test_govulncheck_adapter.sh",
       "sha256": "d70f090d88533c7b2255a75e7a83618652239d0d0e9c4dc36836f6da69cce7ec",
       "mode": 420
@@ -3318,8 +3514,14 @@
     },
     {
       "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/quickshell/a-weather-app.weather/Translations.js",
+      "sha256": "71fb84aea1cdc35ff8884552a7b2e8ea730f42dbba70464f80930ac3c53766b4",
+      "mode": 420
+    },
+    {
+      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/quickshell/a-weather-app.weather/WeatherWidget.qml",
-      "sha256": "b43019ca7ef5784dc1c762da018c99f598172997f18a9856628cb715fac84f88",
+      "sha256": "8670b067ba75edccc2be1451956c0d4e579338b748eeec17e35474ecf1748b1e",
       "mode": 420
     },
     {
@@ -3354,6 +3556,18 @@
     },
     {
       "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/scripts/i18n_catalogs.sh",
+      "sha256": "ac8f601e5c864b147f594ab5c1ee33a7919eb854f22c71294e01a9acff9b5cde",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/scripts/i18n_reuse_website.sh",
+      "sha256": "9853a05d77e2a08935bb55da431c126887424038545fb28c6a13734f9e80cf5d",
+      "mode": 420
+    },
+    {
+      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/scripts/install_release_runtime.sh",
       "sha256": "99d993cc73c5b277fc8bf435f693b15de0490f19110535955b3dc9b197f4bd78",
       "mode": 420
@@ -3362,6 +3576,12 @@
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/scripts/next_release_version.sh",
       "sha256": "6b2e10c4892eff2113402726962bb162cb1c88306881b29983e2ef0a41800333",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/scripts/package_widget.sh",
+      "sha256": "413b5161bf50612f5764674bfcbe7588ed71cee01217e752e66d5e52fb12ea17",
       "mode": 420
     },
     {
@@ -3390,8 +3610,212 @@
     },
     {
       "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/scripts/test_update_compatibility.sh",
+      "sha256": "4ee096c2b4b4ddf19d901b8ea62a39641e75ea43c348dd98acd698cc60167b4f",
+      "mode": 420
+    },
+    {
+      "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/scripts/verify_go_runtime.sh",
       "sha256": "97610c4139870db502272878979862dbcc156d9b881c051c48096493d9f68b1b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/README.md",
+      "sha256": "1370ed9884a4999eaf323733cfdf7570cd0cfe8b03f932687c3b83ab11d34cd0",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_de.ts",
+      "sha256": "aecf0ec74f559c331d3cdfc5cbde90daaf2e83b1bdf9ed4b0627e3fe92e63ff2",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_en.ts",
+      "sha256": "e358fba484cf9aaf6c6b6735f3e55c9a32cdccd9a52dc129f2f707495f4c7957",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_es.ts",
+      "sha256": "4bdb57b6fb0075ea7dfb4d7cf2a693b4b17b27e8dfa41be85aec876d98deb9c6",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_fr.ts",
+      "sha256": "ebba0ae64072f68e2166dd38abcf40591f5de953183a7731c67b0c4e399609f7",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_hi.ts",
+      "sha256": "75376396c53a41402438af5063e51c6fe0ecfc3b784f1d2ae42c235bf9378634",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_id.ts",
+      "sha256": "6ff270093affdf95a517a29dd24ced46a7270e102b80b2ff347c65e0eab52036",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_it.ts",
+      "sha256": "af5c14ecbdef954c033f25e29674525a681c98e5e199b2ee0976249b68fd48c2",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_ja.ts",
+      "sha256": "88018cc90e1a5074fac947f882be269b663c2661125d9680408e0d66137e74b3",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_ko.ts",
+      "sha256": "b66e0459375a972119d857217c486c59c32c318144b4f0502653bc81d6d97df7",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_pl.ts",
+      "sha256": "5e360408dd6a3d649a20d5878f04b6ec7f5940e760b2151c066e5608e36b7ff4",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_pt.ts",
+      "sha256": "44965e431834fcc8c4b070c0cea0b1b2aa5059076e92b7209080ca80a5334902",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_uk.ts",
+      "sha256": "7646ee5d5b38051f73df865b1a3bed535bc8c30d9af03dda3df5988d1e7d3051",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_zh-Hans.ts",
+      "sha256": "06d9caf8be4b02f47b3715461774f0976c5aeda4a6c11b6880f3becdbca96017",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/app_zh-Hant.ts",
+      "sha256": "848918e07da84600481b28addedf8510b1b5f9f1f24e161f317ceff8381fd35f",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/coverage.json",
+      "sha256": "b214cb2ab967132ef7ee26b315302a676c19779cc3c098a1c03f3a07315da304",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/extra-sources.json",
+      "sha256": "661b0ece1f7b8f600c5704174b23ae20eb2c3b13a91783926aa22f076feb2d6b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/de.json",
+      "sha256": "1c1d59a58509fd4f88a2caa2305e40979961cf2ebe35dd8d87e30185a4407b2b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/en.json",
+      "sha256": "d34457504b019655d432aa76dc2930adf4f6fce943e3da457f62aa2d0954824b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/es.json",
+      "sha256": "3ad3c3fdd3dfc62bde70b735ee1083cab89e62778f471702a1a078e255d80744",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/fr.json",
+      "sha256": "e100a1f7715ecbf07ae0029b2b8756ebf3243ed085124fba6f09852369622149",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/hi.json",
+      "sha256": "fc86818ec4d5fbcb86d9619fe094e69fe9b06c06e3cdf05cea10c82ac345dfe9",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/id.json",
+      "sha256": "ba5822c3bb586949c203003babbcd87f48ac96b352f6885af1e07401bf2353fc",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/it.json",
+      "sha256": "c9e4d463c40cbcd2f762d1f40d2c3588924cba21dcdfa10e526ae69f438a7a74",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/ja.json",
+      "sha256": "261b370691ad6b65417a4a815eb8887e36158ac6c789cba60151b1bd4a5a60a0",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/ko.json",
+      "sha256": "073b714e812597b9ede291e7975c6916e49cecb9dd81d579aa228282279f736b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/pl.json",
+      "sha256": "4f45a681ef652314235e3a4529d456efe1cf008e7a65c85ad11527254efab07b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/pt.json",
+      "sha256": "9ac623ccb6bddbb2723b97b234cd00731a6fba4530b9e955dbb0d7e08e54812b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/uk.json",
+      "sha256": "46cb508142ad9c8e18be1f49e417a010598b734e2326f12b52944314ddde83f8",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/zh-Hans.json",
+      "sha256": "a80afbe41fe62951f836f47e27277933a820e49952cf911b07198194625ba860",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/messages/zh-Hant.json",
+      "sha256": "414573b99ee813a5f5692cbddf4ea78f19c1217de6aa660cc2b023c97fb7fc63",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/reviewed-identical.json",
+      "sha256": "a48afc1bacd9fd2336c77c268320289935e51f37b9dc175a70e666ca6350d926",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/translations/sources.json",
+      "sha256": "455cb1dca7158b045137c7d3d18fdb518b55bd608058791b6b3d22cb6615c3ed",
       "mode": 420
     },
     {
@@ -3403,43 +3827,43 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/AirOutlook.js",
-      "sha256": "aea3d4e8d0cf92b01757a354a190ddf17327c438f1ce42a6cf693ec2307241b4",
+      "sha256": "7effff456948d8a49488857dc5e69fd96dc548a815ee5775ccfed51262b39797",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/AirOutlookDetails.qml",
-      "sha256": "5e2d1994438e6e69d1e16c60e006fdd1ae2cea774c9337a642d21f2ef15d30dd",
+      "sha256": "35ffc63bcf856c2024a21211db7613e56ee44711bc68ce23cebdc0b391fb7cb9",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/AirQuality.js",
-      "sha256": "a32bdc3830639cc5cd44df42e2ada6f96a7d4846651a4e1d37b9d423760653ac",
+      "sha256": "9870511cd1b3497a806fcf3ce27f6e2e91f394e6da1171aed67f2dd3be7d2b6e",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/AirQualityPanel.qml",
-      "sha256": "f08b6dc46bcd988c82ecf644c0983cd85d6ebb16fd497f88cf1bd840d9e93963",
+      "sha256": "51859beea4feb9a4b3f8fbd1713e69ce84d001774771996cbdf067a37ef333b3",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/AlertsPanel.qml",
-      "sha256": "9615c5801e15cee676eb6771e2dfda5807cee90a01a1c66f69a0bbda6edf44c4",
+      "sha256": "c20aeefa7fdbb05bed48c3c1945dcaf5b113b67cb1185f909ba30cfa0909b887",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/Astronomy.js",
-      "sha256": "f761e77d559cb620edd190488aa023ac148cddfae3765de58c12c5dcaee0f0a1",
+      "sha256": "df1182ddee9621b78051024ebd9e4ba36a1b9292086cc073fdbe4b7384dd63d6",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/AstronomyDetails.qml",
-      "sha256": "af026a7af6729a0a10ec131587d3b85ac4f44b921a46612246084d4c22925f89",
+      "sha256": "da1b42f2232ecd13b6a4e2d381021343bb74dea7531f34956535c8e67d3e1d9a",
       "mode": 420
     },
     {
@@ -3451,7 +3875,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/Changes.js",
-      "sha256": "255383990d8c60431d704fbe64064eb458305df22b50c9ca065cfe391edcb137",
+      "sha256": "586226c638141b2095053aada4a290dcf6ede5f76678273ab10f8907d3f5ee4b",
       "mode": 420
     },
     {
@@ -3463,79 +3887,79 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/DailyPanel.qml",
-      "sha256": "eeb09b05911e154e950de13b10e1f5ad38bbf7a8383817ca9c39a808555b0f4c",
+      "sha256": "d9d6c7034b43403fb3a022100dc82046c265e8ccf65a2942fe183d7e41b66c8e",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/Dashboard.js",
-      "sha256": "d002f631f35ccba6aaeb88718002e1bda6ce25f7c6bddcce18555c7dbbbaaf3e",
+      "sha256": "a0950cbdde49f44ff68f16c2b8fe3261aa403b8cf3427f75eff72d638a4c3ef9",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/DashboardEditor.qml",
-      "sha256": "c930b27480407a79a21aa6d8fe45756ce170b5477db7f4a0bf924561c3d8c04b",
+      "sha256": "b482f076d5f747f4583be3b8753c328225b57ad0752e94ffc3b3a5d9b26569f8",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/DashboardLayout.qml",
-      "sha256": "94c0bcb2799fab491965a40226c5ba6672125b1ebdcc6bd865f51193c431db32",
+      "sha256": "40a9645c24f06cf6112a7c87231259a40305219496dcce3d8a938686e202f00e",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/DashboardOrder.qml",
-      "sha256": "16ef2a4566a6347c659c5edc3f5fcf62e4e8a05418330ad8219ee0aea23f1010",
+      "sha256": "f218a308ebfdb9249b925b96aff37c25307780d57d1e2f67d8c57f7944b77968",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/EffectsDrawer.qml",
-      "sha256": "3e1164fc2a917de6a45f8769c5b019644e5c1e93c2c6fbdaf9a9ce427218250b",
+      "sha256": "8724e9382bfb026128e74ebeaa62897139677ae36795d45d682bda1e20370735",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/Forecast.js",
-      "sha256": "2e08bd60e014d5e5101705d6ef26f447df91a86a66436e63dcf7b39537c92d76",
+      "sha256": "85624549332227b1da1be85254e7ee80308c00207c2343b8143a85e9d93b3560",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/ForecastChanges.qml",
-      "sha256": "b70d7952a203a858dbc4141ed8603059bac8c0424bb179c4a78d288ae59d8559",
+      "sha256": "f7d44706bb61b60330ff68e7cae05a430a5d3e561a28f870af25b3ab58b177d8",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/ForecastChart.qml",
-      "sha256": "16a51201edab5789f6e9538db1e61dc64a494a1f5dc2ce2e28c1754d73cff5d5",
+      "sha256": "7f001d0d0dabee8ade544b937baea8bf60c6fa70ef3ca4452cb718a7069c5479",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/ForecastDetails.qml",
-      "sha256": "2af5b9232525424bb5cc2f71c8bf81072b4e042d61da55a906b769b2e8b868ed",
+      "sha256": "2f4540b70d105cd382d1e7fa4feed7158be45f3b6a0908e0b9d2438949f60eb4",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/ForecastSaveDialog.qml",
-      "sha256": "27d1e6f80d6f82110e1844c5a081c1dc028906a556fe7ed333bc6d11bf5e8a02",
+      "sha256": "475aef2bcee0df29110b93f770ba3ea249ee60644e6f321bff7fd52927adc42a",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/ForecastShare.qml",
-      "sha256": "e44f7bc5794aaa915a9324ac21cb7f9bffe69f27d078cd45ddbaadddc11b0bf7",
+      "sha256": "8c4080fce4f5ca0c5412650d953f2d055fab2515726cd741ed9e44b51098033f",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/ForecastShareCard.qml",
-      "sha256": "58ed5f3f015d71e774ec388fa8ec0f06715b21f7610adad25b4f42da29f145f2",
+      "sha256": "ad2a26fb4f888e3e46e369a1c434c433b4eaedc0d046c563754365d28987e8d1",
       "mode": 420
     },
     {
@@ -3547,61 +3971,67 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/HourlyPanel.qml",
-      "sha256": "c4a8558b34b63ed79357e280c6f97a41c304a3a3fef1d634cdd9b5a098197693",
+      "sha256": "a74b7d05a0e5ddb2bb28063cbaf1778cc634f22b400e3e5a80569bdaf63e9c1a",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/I18n.qml",
+      "sha256": "5a8c9ece4ca7dacf76927aa9453d70e2a677955e8c77c361aeeb4add22372c5c",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/LocationPicker.qml",
-      "sha256": "8da5130422fc0d5dbf92baafa3a54f644ddd1522911a3065196fa0127692067d",
+      "sha256": "a21f82d61e313a68d17abcffc074ffc22726a62e7c00ac69a5480c44bf266859",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/MetricsPanel.qml",
-      "sha256": "0b39894df71654de3da47e2e952cda2669f47ed0d2b0ec8f44bb1c268811dee6",
+      "sha256": "8d935c81c2fbd463e035ef18161633b69d22b80a9187469f98c40ea8db466f60",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/NotificationsPanel.qml",
-      "sha256": "5d32e379a0db434b6c530498bfcc8ca2820bdaf4cefb4694350e68b263d003fe",
+      "sha256": "78132c808d3568894b27524cd954c83dae604b0acee6a1d24307c0cf791c14c7",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/Outdoor.js",
-      "sha256": "0d3073f05c964b1be13c7f2fffa2130e6291e29dd681d373fc69c8874d7ece99",
+      "sha256": "63b7cf063d3201f675d8bc6f2d01b3da44add0f91c72a1cad296b940eb3af66c",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/OutdoorPlanner.qml",
-      "sha256": "e82895d721a7f831ba1cedbc2fe0791b4b7d7872bf1af39789cd00b7b0590463",
+      "sha256": "0b96328eef3dbbb6e13f4cb9f6f12fb2aa5b51e8eb564846469d6d87615f2f03",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/PlaceSearch.qml",
-      "sha256": "6641a593f183fd95d1fc985d3afe2e6412014912e09239c4095be98311547770",
+      "sha256": "0bfe70439093621569a96e468360b77b9c8122df752033241cffaf336e47761d",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/PlainLabel.qml",
-      "sha256": "b38ae26eedaab789827af00fb845929f533554ec8438ba58dfbe715bc0f66a88",
+      "sha256": "5cc0b35359bfb094cf74b636ef180f57e30b4651c1438e88571bedbd0deaf9c3",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/Precipitation.js",
-      "sha256": "baf9e4daa5cb9514a8215bcdc536fc8258c3fba89bc0fc1937b33b53fbc4bba0",
+      "sha256": "3514104bda4066c595a87e02923d8a4e602ced2a29178c3b72b44e247f5c51f9",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/PrecipitationDetails.qml",
-      "sha256": "5770b7eab6fa47d1307627e75d48d4213ba8edaea99ff2e296ab52af09c97531",
+      "sha256": "78ffab4ec538fa081c9f18681a5ca04281a77fc881b0f99fccf796aaae1ee703",
       "mode": 420
     },
     {
@@ -3619,7 +4049,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/RadarMap.qml",
-      "sha256": "6b82e0be6b65328a21ea9d27af5ccc5d04460e58fca9196087cb05f9a125ec54",
+      "sha256": "74ea73032e5afddcd54316cf4ab5956e53a105f53d7230e707eb2e03b2bca77f",
       "mode": 420
     },
     {
@@ -3631,7 +4061,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/Share.js",
-      "sha256": "f96cdf14752fc71c153473e760741d79282036439099f4f8326332bb99ce34b6",
+      "sha256": "bbe5bfcc81ef468948ee945cda9cfed1d99cb41a337d3a38af8601ea9a3f8aa8",
       "mode": 420
     },
     {
@@ -3655,43 +4085,43 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/UnitsChoice.qml",
-      "sha256": "0acf6e3cd186d8f11fe5ef732a2d4f595dff43d9053356b6fe8adb5ad7b9300f",
+      "sha256": "4674a5fb78eddb81ba16e5a1ce97eac82481f96a72843bf3911f5488bb3d938a",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/UpdatePanel.qml",
-      "sha256": "e645f786db17852bccf8ad470964b41be2043911ec5eac891920a07e1a5bcf73",
+      "sha256": "1fe26c6798e85ec2bae8b4478b8465fd2594796212e58be41e24a109df91cb01",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/WarningDetails.qml",
-      "sha256": "d1b1a33ef16b448b67b449751b8a29ee98bd20c28ed97274c8c47b0990a65409",
+      "sha256": "a9719ce3a8b8eab1256af4719a105d54a0b072066aee673786ce85b5c8a8e1f8",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/WarningNotificationsPanel.qml",
-      "sha256": "bdc4cb5d9d851b46daa7b0bd9e1867a81ba6cb6a89217d85dbe0ec651a11fc11",
+      "sha256": "b5b90a46af3524283e1004a2343654a9c0086f5e8876d165ecc1fe407d4fa432",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/WeatherIcon.qml",
-      "sha256": "d9c05f94dff27f00152cfc8fe457b58c9da1100ed01535c1919dafbd8ad13efc",
+      "sha256": "195eb91c91924ce7299e5c92fe5b9c145ca1ee7973e520871a1185a7b7bcbd42",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/WeatherMap.qml",
-      "sha256": "416e053bb7257f2c33854a6506a870aaa89098a70011bd3e2799b65fbc2368e3",
+      "sha256": "02e5c398260e288828e4f0a730f66835bcc83393475d9e352024942c138268ac",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/WeatherMapCard.qml",
-      "sha256": "4255cd027c1fb182b38efb360da48a9298a171ba64c8719742ea5fa909139b43",
+      "sha256": "8caa82529cfa4892cf49400c74c6371d1098fe981e4d235deddcd667a6632907",
       "mode": 420
     },
     {
@@ -3703,19 +4133,19 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/backend/Bridge.qml",
-      "sha256": "068f2876ae561af9d83e53e10cdb65a66f2d31b9d0759526c11be550a4eb09cc",
+      "sha256": "779c894447ff2aeded2161ad4503a5bb92afb2eaa56cc16e4b81b72ba7af7485",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/qmldir",
-      "sha256": "d766472a1d8050caab7f14759f123c7bdc32854965678ae2c5d0def4f91d8453",
+      "sha256": "a1d5f53ce27e8777426cac18399ba795ddc3aa01fb11b7a21574fdb991364163",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/a-weather-app.weather/ui/qml/shell.qml",
-      "sha256": "0f134cc0adc831487526b7c5f049d44a9576057da4d8c350574594de254b2b6a",
+      "sha256": "f23d85f76483e030972094f3d2e059efe21eb950ce18ff663ba7e0b77cbfe42a",
       "mode": 420
     },
     {
@@ -3752,6 +4182,42 @@
       "scope": "home",
       "path": ".config/omarchy/plugins/chriopter.brumm/manifest.json",
       "sha256": "e1200a5236c0e2e498f6a0194b4a92ae8b8067cf5a8d098e292bac30185960f0",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/cider.bar/BarWidget.qml",
+      "sha256": "15008fdeabefc8404729f62d0790b6f1d3f7f2e5d945066ca675909610850881",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/cider.bar/LICENSE",
+      "sha256": "61213490c5d55e578581e45a13864e9f13b613b5e7ce047f805b97843ee895b9",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/cider.bar/README.md",
+      "sha256": "516bf58e1bb55af9f03b58e68120b193052d8d269fed7680609bd578db94202b",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/cider.bar/Service.qml",
+      "sha256": "60551bffef5123879213b1c355d06ae3038a01e06a00c6e7ed5491bae925da54",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/cider.bar/manifest.json",
+      "sha256": "6e99035b727ee26b0a2deac24544e502fe998facf5ac5d209691cef7cf003b8a",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/cider.bar/preview.png",
+      "sha256": "8854702848e2327f029246c518e583ce9eb670297cd65cb40911dd7f595a70fa",
       "mode": 420
     },
     {
@@ -6703,7 +7169,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/.agents/skills/review-prs/SKILL.md",
-      "sha256": "66c0daecb6c51f6938f0d75242c08815e7a1d82a6269e892cf00681365f4392f",
+      "sha256": "ba9dc17d0e8299a151667bad00a33814e0d9bc173f09848fe3304286c3ddb95f",
       "mode": 420
     },
     {
@@ -6727,7 +7193,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/AGENTS.md",
-      "sha256": "f26cad55c0f3b339420cd61e0393a28f103f69e0a9f59729730cb23d6b0fb91d",
+      "sha256": "01f02d71bd683564299bdc967b2154a9ca7dd8676fc3509e9bc670f66c28eac3",
       "mode": 420
     },
     {
@@ -6739,13 +7205,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/Cargo.lock",
-      "sha256": "be2dda1d448b7cfed6ba8c6b82914da62a40eeb45aa45c579aedfc1c9a7df90f",
+      "sha256": "7534cece1fb0123f9ad40f7f686d246f675435c73e6ce8baef49c51b16dd7be0",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/Cargo.toml",
-      "sha256": "a6e500cff36b54781cc5bed153e4234395d576a93237fd173de9b9b748f20fe2",
+      "sha256": "94ed64d74f7fb3f0f0b671ef2579d133a830aec4694bcd0e8030b7bd378dba1e",
       "mode": 420
     },
     {
@@ -6757,7 +7223,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/Makefile",
-      "sha256": "5a532199b200e802177f75cab0b56204600f7d0485bff9887cb2a3b6f4124db2",
+      "sha256": "7e907f7d793e0b48e3d8fbcd721fa943731796de8890e339bcfec12366a5cbad",
       "mode": 420
     },
     {
@@ -6769,7 +7235,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/CMakeLists.txt",
-      "sha256": "e0061049f114b5b0d2eccf1e09a06c81b189e7e1696b8afb076b1cd9c0dfb881",
+      "sha256": "474c5bf8e942bbe35aeb618bf8d87b4cc100e99e2be6aef4e142be1eb1fa630e",
       "mode": 420
     },
     {
@@ -6859,7 +7325,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/Main.qml",
-      "sha256": "914d4c5c3d7d826887333e721eb9c558e979205cd3a53611ea5e3c783c10bc1b",
+      "sha256": "e83c51bbaf25ea901b084c16bd32578830aad0870dddc354ffe7948d791b7249",
       "mode": 420
     },
     {
@@ -6871,13 +7337,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/StandaloneShell.qml",
-      "sha256": "b520dccd65570d7f1d22a579b679b72603b8bf86c1fe6a723d94cc9f347b8a12",
+      "sha256": "ee3df9deb33f0bd2551a8faec535939473179df1c567f91596973bcf002080c6",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/Quickshell/FloatingWindow.qml",
-      "sha256": "2f7446e7375c2632a1fae028c69574441c88997aa1abb199826ba19f74181b38",
+      "sha256": "15b9305b712647969b629ec1a8b54ad84aab3baaf9b3896d477502b759743b61",
       "mode": 420
     },
     {
@@ -6913,7 +7379,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/Quickshell/Quickshell.qml",
-      "sha256": "6671dd16306ee85b090d03b829539597ebfec8d622d45fb7476a5ca5a719fa27",
+      "sha256": "8597f10754fd13b65d3164f8027376443e602f9e2d9db81156d0e8c92ba91bcf",
       "mode": 420
     },
     {
@@ -6943,7 +7409,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Commons/Style.qml",
-      "sha256": "1ed65f413a330c44a388334dda9d328319d99f392136cb95ea1f6956905ff95d",
+      "sha256": "db85480be68160a9be963146728d2547976f5fc7c0c7f4d1e40b32391d2ef2cf",
       "mode": 420
     },
     {
@@ -6961,7 +7427,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/BarIconButton.qml",
-      "sha256": "7fafd47f2f1ddaa29c0d4e82d81709c0e6c302dd62d20e5e501991c4bed2065c",
+      "sha256": "dce47a9290bc708b7ca85cabcb952ea0b827c4233986eee82db551c94caccb99",
       "mode": 420
     },
     {
@@ -6973,19 +7439,19 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/BorderSurface.qml",
-      "sha256": "ce56f136ed34c232073f69c80a1da4681aa8e8bacab8bd1636e0f6e96caf9367",
+      "sha256": "577ce878157cbd05cbb0d2209d261aa496f1a466343b407604ccb718efd7dbd3",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/Button.qml",
-      "sha256": "1b0c842b8f142ccab88ecc8f6dc528164cf9357180f635bfefabee283c8bd034",
+      "sha256": "e02f4cf1447803dbcda8069cc177beee01397da69c58d8b2177ee5f13b64c732",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/Dropdown.qml",
-      "sha256": "4db85bcc3c440d3ffb469d4e4a388e4a77a0f02fdafec9af91daa2e800df6060",
+      "sha256": "f9606302f89fd11eb2905577055cb66622a7ce2037cc10ad117370d130547def",
       "mode": 420
     },
     {
@@ -6997,43 +7463,43 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/NumberField.qml",
-      "sha256": "b3956ce12675411a7e1d33a4dfd31bd7fa12088c78eba51aaf4b02f95a2a2b25",
+      "sha256": "96bce6d155edc588fd9180d269a86c82d13bb1cc195e64a2c31a042f7e7508a5",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/PanelActionButton.qml",
-      "sha256": "14e72a4658f2e511f3f4b539bdfcbd8cbd5d4346745d1572b35fe1187b6e1237",
+      "sha256": "54ccac8215bee2632c6261a7a0d8002221641a78713c62cf5883b2ebc1e1e499",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/PanelSectionHeader.qml",
-      "sha256": "f938a6adaf7f8335c6f62bc447ef683cc68d7aad9c32758a09d7b17b1dc3b63f",
+      "sha256": "a2a3c56d030dc347c3b28ed0f3548105da82deec4087693f40c8be1d30ee08ff",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/PanelSeparator.qml",
-      "sha256": "819061c96481297c06d32e9c0759db476041e7ec118ee259c7af5b770388be9f",
+      "sha256": "71a61e3175391f0b58f0aed5c3c331af26369d0c4ba6d115b04e7913f074d6a2",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/PanelToolTip.qml",
-      "sha256": "bc6609e6088e53aa7106ad8083a110b90149d040ac1be0f9fe2a41f1c85a9805",
+      "sha256": "f976388a17524cefcee47d111c9d9a0e2607983e77d7f4bc50c8131b7cc1d663",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/TextField.qml",
-      "sha256": "dbef819aa1de9f2e7aca6f227f408d82b63f4c7583644ceb22e5b430ed73c581",
+      "sha256": "63ba9950b3032a5232b55e176571041dac62b8cd4157882cf48052d51f4164cb",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/imports/qs/Ui/ToggleSwitch.qml",
-      "sha256": "4049cbbc391880ef42b18b41980a5fe18965a74561d9be4bcc6c616fcc878ee4",
+      "sha256": "b8e2cf8e1eb0b40fb3d39d72190adc6d958646ee0dbcf59b0eb3c32f5d892c2f",
       "mode": 420
     },
     {
@@ -7045,13 +7511,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/styles/Omamail/ComboBox.qml",
-      "sha256": "35427bc48b12bc4bb88773bc6b5b67a8527bb663c1a4f61be52e3b451fb62dbb",
+      "sha256": "1f9fca989cd559ca1873eb591cb6ff1f1a521741aaba84050baa8f9ef89831a2",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/styles/Omamail/ScrollBar.qml",
-      "sha256": "f63348acc2c400956606b72ba0caa24c275a05704fb1c0d5d09b360649a70b6a",
+      "sha256": "e46daa06a63061d90ec1c2addc33b781ec0a8e286f073a9770c57d52ab64c7e3",
       "mode": 420
     },
     {
@@ -7069,7 +7535,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/qml/styles/Omamail/ToolTip.qml",
-      "sha256": "2f246dbf9c04aa5d92a5130c4aaea38ef04b51a18b15ae25bf5dd49d632b45d3",
+      "sha256": "8240506dc9fafbbcc36478d1a987d7588ecf10a3bded3d62d04c242d35f598f7",
       "mode": 420
     },
     {
@@ -7237,7 +7703,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/app/src/resource_check.cpp",
-      "sha256": "2dc8f4149db9a09d7340972805f8b163f3eb84825c7b51631131ce19c33d0145",
+      "sha256": "30b905dbf950189f2720d7266d384d8eb60b54400c16d5cf2af2ab46236204dc",
       "mode": 420
     },
     {
@@ -7267,13 +7733,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/backend-api.json",
-      "sha256": "9fec434ec1ea5044dde2bc423df614ddaa3d1a366b1c31810b3439eb2d044bdd",
+      "sha256": "1a6a497c75aad1ab9d7b7aed495a1461127ad562dbb2f72f9d500c91a53c6e46",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/backend-version",
-      "sha256": "a776a045b5a7445f6f8d1c05125277faf1e2280bfadd0353ca778a727e49e539",
+      "sha256": "795d6bc79574d2aec03ad9cfec404bb95083c9dd210e6521e0d4199772d28d44",
       "mode": 420
     },
     {
@@ -7507,7 +7973,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/docs/BACKEND-RUNTIME.md",
-      "sha256": "bac118e8e255ec89d8debd592079e79e884abdf81b6c44ed80ef0b65e57e9c97",
+      "sha256": "ffbfe37b9cc5dc5494701c7b52d4706f27f481683157dac08a6ca595a6f0e5de",
       "mode": 420
     },
     {
@@ -7543,7 +8009,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/docs/MESSAGE-RENDERING.md",
-      "sha256": "847fba779f747ff618af565fdb740759d1fde20ce64a62737ac4fba93cd2fd27",
+      "sha256": "5036a0e081c837f407214667a9b7685eac4f1ba354d53dd78768e57beafe760f",
       "mode": 420
     },
     {
@@ -7699,7 +8165,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/manifest.json",
-      "sha256": "4eb5d1acc6e61205b2a0e89ba348d158b982d64501adf9be78109b1260bfbd8a",
+      "sha256": "a9507a63b99578df18e7cf47ef4110e00548d72ca7bc1d2fed305b6677ae0066",
       "mode": 420
     },
     {
@@ -8137,13 +8603,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/auth/callback.rs",
-      "sha256": "0c409bd58a588cbef13916a5cfa5965a9a60f8bb44bce82bd164915f28e29652",
+      "sha256": "ec3299f497b2c6ec89ce3a5db5cfae02a67c183c86ae9c4627ce692564685fff",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/auth/credentials.rs",
-      "sha256": "be8c28c7caae7124bc6252154a9a9b572704594c198c6757b24a9c6f286daa94",
+      "sha256": "7fe70697ec96e6380ae1344c6ca032219f64bd1eed3c1df70ce7136a2aaa51e0",
       "mode": 420
     },
     {
@@ -8167,13 +8633,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/backend/mail.rs",
-      "sha256": "469d9e9dbfc8606bac00ac69fbb806a02e606998554db9dff117067470bfd472",
+      "sha256": "616c800fb4d5230a97a88f8067b350f2760d389d59288e1ffa2ea2ab1970a7a0",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/backend/mail_action_tests.rs",
-      "sha256": "0d285448f49a9782f0ff15da5494e4456b8c1cd6b6c6cd377c96477665bcdfa1",
+      "sha256": "501761d5cc37bb0d9f96ddef79cc78099b452559c6995d553520bd94f3c25ea6",
       "mode": 420
     },
     {
@@ -8185,7 +8651,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/backend/mod.rs",
-      "sha256": "4975cbb7ac0791417944f8a3fb63b994ce69b0cdb3373019b473fb9d41b1db5a",
+      "sha256": "0b9e90156116b8b84067dfa07a8f9cf8c83c786e9107dce37be9f7b6cddae670",
       "mode": 420
     },
     {
@@ -8209,7 +8675,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/backend/stdio.rs",
-      "sha256": "25573dd6c750f01b00fc9c973cf6fdc7cbd33f59390dd929dda64a71f781f308",
+      "sha256": "5f989e560786b5772717f840e1556014987938e3a74088b1ce25349d74d6784f",
       "mode": 420
     },
     {
@@ -8287,7 +8753,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/calendar/discovery_runtime_tests.rs",
-      "sha256": "38541ae8d69e88356989ee815dbc950d55ef19fd61dfa904bdfabef709a0c24e",
+      "sha256": "3285ec5d1dd64651539e562b8333d182a9f39dba3d13852150d3c3e026d137cb",
       "mode": 420
     },
     {
@@ -8347,7 +8813,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/compose/tests.rs",
-      "sha256": "12ef4612380905ae72d60cd5a283aa5097dc7e83203ec0061b7fa36faf794760",
+      "sha256": "01c1b33dac762fdbe0df86e78aa154b18f8eafc4120981b15dd2d2273499ec49",
       "mode": 420
     },
     {
@@ -8377,13 +8843,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/credentials/secret_service.rs",
-      "sha256": "68011a7d555e113524afe1a225772c9b112e4150f9a7524011748294082ff4fb",
+      "sha256": "41c56d17ac0a80a8cb1da2c0a034ac5571bdcdf5c6249a68851113ecdab6a196",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/credentials/secret_service_tests.rs",
-      "sha256": "b9e545b69e3740e34586418f60367f57e818978035c53c7b9887664f1b90fc65",
+      "sha256": "53aef0d85c9d538bb65211c7c4ed65f6ed04df37079f0cbc63d3016502dad89f",
       "mode": 420
     },
     {
@@ -8485,19 +8951,19 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/main.rs",
-      "sha256": "10451f0e73a76c135a7738ea2a01240f8fa8e6c6dbb89562a968c468602ad12e",
+      "sha256": "38f129b9dec9b2d1ce5533eda421185bf637c452353876d9a85889a2670d6131",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/message/compose.rs",
-      "sha256": "49593db05ba2a9c4ed344af50bfb56d8cf843fbd05e1da6b46be66b4a8c4882e",
+      "sha256": "6a82f150ff849e14673724ae8de5e8587e87e33ff51b19c5d04595d53c8662a0",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/message/content.rs",
-      "sha256": "212cd1121ac5c6e80b79a89de005c9074e215e195d2e550b56a5604be77f3aa6",
+      "sha256": "2e34c921b238d377c4f7c24180b0df255194d787b89eb00f677a4093cc8df34b",
       "mode": 420
     },
     {
@@ -8521,8 +8987,8 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/message/html/mod.rs",
-      "sha256": "4002037d963a22f1cea55a11ebe8f7524f02b83b8d6bbb890746d2b6e093a99b",
-      "mode": 384
+      "sha256": "9aa1a88962b4f8e9aebbb36c64136bf04bdb15cb2b2744dfd95df7c36828e6f4",
+      "mode": 420
     },
     {
       "scope": "home",
@@ -8533,13 +8999,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/message/html/reader.rs",
-      "sha256": "a2c5759195477847914c95b3e93ba133d8a8764a62897f1cf848f52d6de16fe6",
+      "sha256": "6cbec9c6316a719f48f6409030c4849fde6f7b170a937e8dc596a64051267adb",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/message/html/tests.rs",
-      "sha256": "cb99f4028e3e30b1d0fb863013b33f33538efd3c873777820b68d439b0485973",
+      "sha256": "ebbf1592c7385731937984538585a90452442580684d2b28170b8381243eb556",
       "mode": 420
     },
     {
@@ -8569,7 +9035,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/message/tests.rs",
-      "sha256": "81b9eb88ffc6065d48ef4540937bd1fc7f5b2de5819c4013bcb01e5f99a76fbe",
+      "sha256": "5574db17241dec4ca2cfb83c819c9e17cc233d3681d79e9acbb95389e966a882",
       "mode": 420
     },
     {
@@ -8605,8 +9071,8 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/platform/dirs.rs",
-      "sha256": "0ab2f86255fac87fb083421814f3633985716af6d43e6921f23b2f8c591dfc7b",
-      "mode": 384
+      "sha256": "e5c1dfc54487744b0078e63d385cdae02441bc91763f4eb3c01bbdbb0353e0c0",
+      "mode": 420
     },
     {
       "scope": "home",
@@ -8731,7 +9197,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/providers/gmail_http_runtime_tests.rs",
-      "sha256": "da901f68283b9dac23572b90ab2d498c083bb508e8bed6e85abbe849d19e6fbd",
+      "sha256": "73daee3567b746cecaccbcaa8313d9a92c76de559bda85aaad45f38ad8bf610e",
       "mode": 420
     },
     {
@@ -8797,7 +9263,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/providers/imap/idle.rs",
-      "sha256": "df8721732085980f5ac8cd8e707870bda556416cedc67ccc49daee17da54c55b",
+      "sha256": "0d4077270c594362dd57dcee4db6242fc720764b4ddf0f141d9ec85897e300fd",
       "mode": 420
     },
     {
@@ -8809,7 +9275,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/providers/imap/mod.rs",
-      "sha256": "e24089d7a28d7d78cdb9aa528887ba18880faa0f2cd725f6e07ff43fe2ae6b68",
+      "sha256": "3a6eb884b988899284b3eb20cdbd33ee192c14e0855f68e98854a1f7f0a5e80b",
       "mode": 420
     },
     {
@@ -8857,7 +9323,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/src/providers/imap/read/tests.rs",
-      "sha256": "e10b9218c305780d77bdda306a0c9665a5766e5993c735db944da6eb0cf94d28",
+      "sha256": "facbf3452fcdf9568ab48ffb56b04c881246104d4bd9fd3d9c325216d233e5c4",
       "mode": 420
     },
     {
@@ -9007,31 +9473,31 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/App.qml",
-      "sha256": "3b2312756c7d7e690bf58e9b452a134c02c08641eea4c80e2fb09c651c4fb0b6",
+      "sha256": "5fe5eeece89560eb476dc0ea033f5bb417cc2c7d41e5e9eb0ca1393f73c4c747",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/BarWidget.qml",
-      "sha256": "9180e4d3ecd13d7d1385565f8354381918b6e809d36b4afce944298ffa2bcc0a",
+      "sha256": "12415723dcdcd98dbe467b4dfee6f9f0a3d1c59c2a6571fd3ea0a78dc15b46a1",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/Service.qml",
-      "sha256": "b52e81ecd53f0a39305c31cc23240d37ad3499abdbb389af2ea30bf0046074d2",
+      "sha256": "8bee44675fd4640b35acd70490d8c9bb973f1c271762f501dae52887ba3b5304",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/account/Accounts.js",
-      "sha256": "f052417851e6682d261d8090c9d51bd7961f03a2495d00704973b287166912f9",
+      "sha256": "148ddd8abd4a68871a3b4dc2b66260a10d719f7d1ff5a2979cfa4c0cb9ea1ef6",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/account/Aliases.js",
-      "sha256": "389807e635e5a7bb25169aa269db52a28b76d533bb73842102f3f8a27a4b069b",
+      "sha256": "740c07d5c20998e0e4b70f96945d4672de6bcb5eea853729bd88f19e2b4e3688",
       "mode": 420
     },
     {
@@ -9043,7 +9509,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/account/BatchAction.qml",
-      "sha256": "fced0353ed3566a6b34fb58637fb2dfd763bf210b6e83059145e90f3e96b86f3",
+      "sha256": "fd14ff4e7fb787dc673b3376d50876df47d9e6a51619a1f0de3c71a5f32fd34f",
       "mode": 420
     },
     {
@@ -9067,7 +9533,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/account/MailAccount.qml",
-      "sha256": "7a1f955291415312b568604542b64b5111567ec9ee702b9da5a14e8609ba2f98",
+      "sha256": "ba854699008a5b927325dd01b805da0523be41660ee97f8ceeee6d3be8ce5cd5",
       "mode": 420
     },
     {
@@ -9109,7 +9575,19 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/account/Unified.js",
-      "sha256": "f91b328c4f38f34de95b1c158b55ea6de815be294c942d1e0647398620ae8948",
+      "sha256": "940fd7cfc320ea907c5bd9c2a2d56097650e1a6104068130e348ae8a6dcfe602",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/omamail/ui/account/UnifiedBatchAction.qml",
+      "sha256": "a6a3b1063b2f0bef2790b97b1460bfb63a98e7e4573d16365c4017d6e06990ea",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/omamail/ui/account/UnifiedBatchSelection.qml",
+      "sha256": "0d019598421bc2755ea2ed8306b04af33142a8b238c5531b5fbc6873325ba47b",
       "mode": 420
     },
     {
@@ -9193,7 +9671,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/backend/Backend.qml",
-      "sha256": "5d9d521282ab53dbe548be0f996ae8a8c399829251d8b2b41215e2fb99a82028",
+      "sha256": "dc70ccac23e95a12bf24cc37e9c05c9abfdf68c1e4010c3a44db8796f04cc8cb",
       "mode": 420
     },
     {
@@ -9277,7 +9755,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/calendar/Calendar.js",
-      "sha256": "67d3e69fe233265c8b60e0d88fe3adebaa5ef52c79d7a5f6b4d47443326a91c9",
+      "sha256": "88d56b2f1f3a7db24fcf6a0685412343bd0cd3ae3ee4fb3f2df9e136cb0ef96a",
       "mode": 420
     },
     {
@@ -9289,7 +9767,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/calendar/CalendarController.qml",
-      "sha256": "0f900cf1e791c5183c43ff3ea12734cbe000023755ab0ef19efcd4c2e76aedcb",
+      "sha256": "c8c8d3abaf3b111a86b2f242842c6e69e9a4267eab295924436a7aef610ed836",
       "mode": 420
     },
     {
@@ -9301,7 +9779,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/calendar/CalendarReminders.qml",
-      "sha256": "20da1c468b1b211752fe1f9e1c8e9d9d6403381f010dd695f5826964725ba8f7",
+      "sha256": "7cd6701298eb3ecdfb0229a18b3d1a4717743f8434fb0c711d2399be6d7eab73",
       "mode": 420
     },
     {
@@ -9325,7 +9803,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/AccountNameField.qml",
-      "sha256": "a07eca41197d67113d4464e547a63116c1e587ab4648dce71d80ace1c33461f7",
+      "sha256": "1adf3cf4d45daef860f0c33fe96f4baff424334976e2d218c9fd5def2dd69e1c",
       "mode": 420
     },
     {
@@ -9343,7 +9821,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/ActionIcon.qml",
-      "sha256": "46acd298674b8c3de0e0dc73f1018602079180b0e0948a99829f6be6b0873637",
+      "sha256": "a16c12417fe24409cf6dd1cd7f3a0c9acbcffe3ba9b2f8c9404f8597b9a97d70",
       "mode": 420
     },
     {
@@ -9397,7 +9875,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/CalendarEventDetail.qml",
-      "sha256": "5a47197e014ec114c4a3d88346826cd7df21d4d00a04aaf49335b0d18da4ee59",
+      "sha256": "c257ac68c5bb44cfe9bffd773066624f0f563378724653cf7670ced152abedcd",
       "mode": 420
     },
     {
@@ -9409,7 +9887,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/CalendarReminderPanel.qml",
-      "sha256": "53f4260a33795618a1dfd07956b6687f271e5b7f3fd88872d9e25d893cf693be",
+      "sha256": "632b6c39162a5e2b54643db9b39028fa0db9e4ea50403bb9fd6742a85467c495",
       "mode": 420
     },
     {
@@ -9421,7 +9899,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/CalendarView.qml",
-      "sha256": "54154190f8508bb604d6e17ad28140c66a087427993c287942eb8b26e345d984",
+      "sha256": "062c685c38271e65a4de4e45ee190903733d2bda610290fc711a10f85ff80762",
       "mode": 420
     },
     {
@@ -9475,7 +9953,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/GmailIcon.qml",
-      "sha256": "edcd24aa4751691ed4fc192706f6cc520c3c417ae4f9cbcf0ea86802786f846d",
+      "sha256": "b4b6e7ff9a550bf7b8057bba9754726e845882c1a7f53372451b8e2317bb181e",
       "mode": 420
     },
     {
@@ -9487,13 +9965,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/IconButton.qml",
-      "sha256": "48b21ae8a7c455a877aefe404d67f801504a123a669268378b108954963b9296",
+      "sha256": "2f6d7194a4f23eb11ae1c403bab775a645565f343e8632dc9f1a8067aacc82d9",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/IconTextButton.qml",
-      "sha256": "98d1c9a5c1bfb76f01c33605daba6c09773f2e2eea00466037ac60809d6397c3",
+      "sha256": "f4b94d76a1cb8d81b7dc4958f3b8156a9bff7e814361afb3ccd4fc0feaea55e4",
       "mode": 420
     },
     {
@@ -9511,7 +9989,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/ImapSetupPage.qml",
-      "sha256": "fdd83b9dc0bb9428ca58291137dde2dd41e2ed354f909ae2abdd97bb6eea7f10",
+      "sha256": "a6da045961ac2145a42797d9f3bad966aea49c9135da1ca11c8ab505cdadc814",
       "mode": 420
     },
     {
@@ -9607,13 +10085,13 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/MessageMenu.qml",
-      "sha256": "d21e8c0b469712d264e49237fd62214bd838799d941c0961c5b561918635ac2d",
+      "sha256": "001962d5d7d870da321d8e8f4c537e7f526b56d8b4032c047682a1afed2ebcfc",
       "mode": 420
     },
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/MessageReader.qml",
-      "sha256": "ef19c708e04dd04ac03ea60bb957046e8e143a5d6be6e7ef1d43fbf2e1656076",
+      "sha256": "f86e6140b62e43e3fa8f56c13478baba3372e4320b5906c319fc788cb2f2d5c8",
       "mode": 420
     },
     {
@@ -9637,7 +10115,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/OutlookSetupPage.qml",
-      "sha256": "09d6c4aa2e94de5dbea2d5f36ff5db2b3e4b2e2160eaf692be83bdc5fe66c53c",
+      "sha256": "ea7ff44773c3634ea316eef809a6465a7aeb9741e7dd42e9732d2f45bbb530d8",
       "mode": 420
     },
     {
@@ -9649,7 +10127,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/ProviderLogo.qml",
-      "sha256": "f05edc74d3fefe8219045c6ab9b523b2e6a3cd00441d288952b634cd3a24a64c",
+      "sha256": "e2391d8959cdc69be67be684ed9aa5720dbb2482c07ef96096dc8b0c7456368d",
       "mode": 420
     },
     {
@@ -9690,8 +10168,14 @@
     },
     {
       "scope": "home",
+      "path": ".config/omarchy/plugins/omamail/ui/components/SenderNameField.qml",
+      "sha256": "1cd1bdc687eaf78d922360d5decd1b9e9f490ffea6a5b4fb998dbb01f0c5129e",
+      "mode": 420
+    },
+    {
+      "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/SettingsPage.qml",
-      "sha256": "64837b391e64c7327493574075cc2fb187dacc596b1aa8183f254a237957a6f3",
+      "sha256": "238ffeeda855ae6637e6b80b75fbfdaa672c999827037726362b734209d82fc7",
       "mode": 420
     },
     {
@@ -9710,6 +10194,12 @@
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/ShortcutHelp.qml",
       "sha256": "237773cc7eaee72a3a5d5d000f40e70254399f38c3d21047a0be26d3e2641092",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/omamail/ui/components/SubjectMenu.qml",
+      "sha256": "a4df7e7e1e6ec246eb9236e13fc4f9bc3f632cb310c4ea742e8acef7979e8db3",
       "mode": 420
     },
     {
@@ -9733,7 +10223,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/WeekCalendarView.qml",
-      "sha256": "207835b7b4617db059ef6fae038bd620b13d2d8b8cb4850ed9a72941e5098349",
+      "sha256": "2403d80833730e203e7e8bb54e00358e007c32eba356c43cff4a072a3a2ff832",
       "mode": 420
     },
     {
@@ -9746,6 +10236,12 @@
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/components/WindowMoveArea.qml",
       "sha256": "fec572e1692c0cadd3ed15298a41049e6efc26a8491342ac01d9cdc43366fda8",
+      "mode": 420
+    },
+    {
+      "scope": "home",
+      "path": ".config/omarchy/plugins/omamail/ui/compose/PendingCompose.qml",
+      "sha256": "d2cc64f1b64145060b460b737247f4643f1366dc4fc34962b81c7559903e45ec",
       "mode": 420
     },
     {
@@ -9787,7 +10283,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/message/Calendar.js",
-      "sha256": "a0c7dae8d81331cb220472659694a578fa1c8b2a99a87b480e16b741820a28f1",
+      "sha256": "96fb52111222412f282df6a73291895736c325846efeec6a1e215790d608b712",
       "mode": 420
     },
     {
@@ -9895,7 +10391,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/providers/ImapAuth.qml",
-      "sha256": "da5c0553bccdcc0e70da28b1ece8c1b3507c91dd7d8a287cfb826fe3db3a454a",
+      "sha256": "76f352bd530f65b804c7ac5ae64dedffdbae99f58b082637ddc01d052c8f178a",
       "mode": 420
     },
     {
@@ -9925,7 +10421,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/providers/JmapClient.qml",
-      "sha256": "6c23835b3edf49eb987081708a36247352fdb0639cc365f14d58645abaad3b17",
+      "sha256": "aa57eba4ccc1737a50df6ae194fcf5643c636b9afe18a81c6ff3be820116a8cb",
       "mode": 420
     },
     {
@@ -9973,7 +10469,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/plugins/omamail/ui/providers/OutlookAuth.qml",
-      "sha256": "72221e6ac071f3e83479439ce5002ca69130d59c30f32c52e551233f0a1893f1",
+      "sha256": "79758d8d382192ae40922339bb81c221b7d4ca43fd6c4dd333405114658c70e8",
       "mode": 420
     },
     {
@@ -10207,7 +10703,7 @@
     {
       "scope": "home",
       "path": ".config/omarchy/shell.json",
-      "sha256": "7bc5e69dcc4b27eedd35bdc8c18d8b749ceb8a730dccd186dde6869e3935b25f",
+      "sha256": "477cbf7653b0509972f112b041fd278ac988098d728bc69182438443ce432485",
       "mode": 420
     },
     {
@@ -10225,7 +10721,7 @@
     {
       "scope": "system",
       "path": "etc/mbpfan.conf",
-      "sha256": "54b5e5342a01caf29ffb451f54b96361ac19ec1e18420c96107107b84d8844fd",
+      "sha256": "dd9b65f5fe4d24400d9c1789d0a2634b646ab0cbbf5ace7e04dac19cd7b8d370",
       "mode": 420
     },
     {

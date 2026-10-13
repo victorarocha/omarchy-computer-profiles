@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "cider.bar",
+  "name": "Cider Bar",
+  "version": "1.1.1",
+  "author": "ndrewtx",
+  "description": "Dedicated Cider playback status and controls using MPRIS.",
+  "homepage": "https://github.com/ndrewtx/omarchy-cider-bar",
+  "license": "MIT",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Cider Bar",
+    "description": "Cider now-playing status, metadata, artwork, and playback controls",
+    "category": "Media",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}

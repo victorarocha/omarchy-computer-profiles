@@ -1,4 +1,4 @@
-import argparse, json, pathlib, subprocess, sys
+import argparse, json, pathlib, shutil, subprocess, sys
 from .core import ROOT, VERSION, capture, validate, load_manifest, safe_id, hardware
 from .apply import apply, restore, lock, SECTIONS
 
@@ -10,6 +10,8 @@ def main():
     create.add_argument('--id');create.add_argument('--description',default='')
     sub.add_parser('list',help='List repository profiles')
     sub.add_parser('detect',help='Print hardware identifiers (no serial numbers)')
+    item=sub.add_parser('delete',help='Preview/delete a repository profile')
+    item.add_argument('profile');item.add_argument('--execute',action='store_true',help='Delete the profile directory')
     for name in ['show','validate','lock','apply','share']:
         item=sub.add_parser(name,help={'show':'Print a profile','validate':'Validate schema, paths and checksums','lock':'Resolve and verify selected application versions','apply':'Preview/apply an existing profile','share':'Stage/commit a profile; optionally push to your configured remote'}[name])
         item.add_argument('profile')
@@ -35,6 +37,16 @@ def main():
             print('  '.join(value.ljust(width) for value,width in zip(row,widths))+'  '+row[3])
         return
     folder=ROOT/'profiles'/safe_id(args.profile)
+    if args.command=='delete':
+        if (ROOT/'profiles').is_symlink() or folder.is_symlink():
+            raise ValueError('Refusing to delete through a symlinked profile directory')
+        if not folder.is_dir(): raise ValueError(f'Profile not found: {args.profile}')
+        if not args.execute:
+            print(f'Would delete {folder}. Run with --execute to delete this profile.')
+            return
+        shutil.rmtree(folder)
+        print(f'Deleted profile: {args.profile}')
+        return
     m=validate(folder)
     if args.command=='show': print(json.dumps(m,indent=2))
     elif args.command=='validate': print('Valid:',m['id'],f"({len(m['files'])} files, {len(m['plugins'])} plugins)")

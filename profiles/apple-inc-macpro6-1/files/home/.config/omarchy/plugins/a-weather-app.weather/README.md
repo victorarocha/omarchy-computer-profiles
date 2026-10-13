@@ -21,8 +21,9 @@ Live desktop rain demo. [Watch the video](media/demo.mp4).
 
 ## Screenshots
 
-These screenshots show the development build with live weather data captured on
-October 10, 2026. Conditions and alerts reflect that capture, not current weather.
+Forecast screenshots were captured with live weather data on October 10, 2026;
+the language-menu screenshot was captured on October 12, 2026. Conditions and
+alerts reflect those captures, not current weather.
 
 **San Diego · weather alerts**
 
@@ -39,6 +40,18 @@ October 10, 2026. Conditions and alerts reflect that capture, not current weathe
 | San Diego · observed radar | Mumbai · air quality |
 | --- | --- |
 | [![San Diego observed radar and playback timeline](media/radar-san-diego.png)](media/radar-san-diego.png) | [![Mumbai air-quality information](media/air-quality-mumbai.png)](media/air-quality-mumbai.png) |
+
+<table width="100%">
+  <thead>
+    <tr><th width="50%">Shanghai · language settings</th><th width="50%"></th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td width="50%"><a href="media/language-settings-shanghai.png"><img src="media/language-settings-shanghai.png" alt="Shanghai forecast in Simplified Chinese with Settings open and the language menu expanded" width="100%"></a></td>
+      <td width="50%"></td>
+    </tr>
+  </tbody>
+</table>
 
 Select an image for full size. Use the **Locations** sidebar button in the toolbar,
 or **Ctrl+L**, to switch places. Home is the startup location and
@@ -79,6 +92,11 @@ date changes and fresh reopenings, with an optional cache for offline use.
 Closing or hiding the window stops its requests and removes the detail view.
 The source is Open-Meteo best match; retrieval time is shown separately from the
 ordinary forecast. Minute-by-minute rain timing is not provided by this view.
+
+Available in **14 languages**: English, Español, Français, Deutsch, Português,
+日本語, 简体中文, 繁體中文, Українська, हिन्दी, Italiano, 한국어, Bahasa Indonesia
+and Polski. Follows your system language automatically, or switch instantly in
+**Settings → Application → Language**. Translations are included for offline use.
 
 ## Install on Omarchy
 

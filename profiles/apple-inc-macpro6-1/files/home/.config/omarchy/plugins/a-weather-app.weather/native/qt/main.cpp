@@ -1,4 +1,5 @@
 #include "transport.h"
+#include "i18n.h"
 #include "maptiles.h"
 #include "radarimages.h"
 #include "graphicscapabilities.h"
@@ -12,6 +13,8 @@
 #include <QOpenGLContext>
 #include <QElapsedTimer>
 #include <QDateTime>
+#include <QTimeZone>
+#include <cstring>
 #include <QTimer>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -62,6 +65,28 @@ class SignalPipe final {
 };
 } // namespace
 int main(int argc, char** argv) {
+    // The headless service uses the shipped Qt locale implementation for rare
+    // desktop notification dates. This mode creates no window or graphics
+    // context and accepts canonical instants/timezones, never display text.
+    if (argc > 1 && std::strcmp(argv[1], "--format-notification-time") == 0) {
+        if (argc != 4 || std::strlen(argv[2]) > 64 || std::strlen(argv[3]) > 128)
+            return 2;
+        QCoreApplication formatter(argc, argv);
+        const auto instant = QDateTime::fromString(QString::fromUtf8(argv[2]), Qt::ISODateWithMs);
+        const QTimeZone zone{QByteArray(argv[3])};
+        if (!instant.isValid() || !zone.isValid())
+            return 2;
+        const auto local = instant.toTimeZone(zone);
+        const auto output = (QLocale::system().toString(local, QLocale::ShortFormat) + " " +
+                             local.timeZoneAbbreviation())
+                                .toUtf8();
+        if (output.size() > 256)
+            return 2;
+        return std::fwrite(output.constData(), 1, output.size(), stdout) ==
+                       static_cast<size_t>(output.size())
+                   ? 0
+                   : 1;
+    }
     QGuiApplication app(argc, argv);
     // Ask for the shader package's core profile only if the driver can create
     // it. Older contexts keep Qt's default and use the readable static path.
@@ -105,6 +130,8 @@ int main(int argc, char** argv) {
     WindowActivation windowActivation;
     RadarImageControl radarImages;
     QQmlApplicationEngine engine;
+    NativeI18n i18n(&engine);
+    engine.rootContext()->setContextProperty("nativeI18n", &i18n);
     engine.addImageProvider("radar",
                             new RadarImageProvider(args.value("socket"), radarImages.state()));
     engine.setInitialProperties(
